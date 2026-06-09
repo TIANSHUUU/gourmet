@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useLang } from './LanguageContext'
 import type { Restaurant } from '@/lib/restaurants'
+import { basePath } from '@/lib/basePath'
 
 export default function RestaurantDetail({ restaurant }: { restaurant: Restaurant }) {
   const { lang } = useLang()
@@ -21,7 +22,7 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
       {/* Hero image */}
       <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-8">
         <Image
-          src={`/images/${slug}/${images[0]}`}
+          src={`${basePath}/images/${slug}/${images[0]}`}
           alt={name}
           fill
           priority
@@ -48,7 +49,7 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
           {images.slice(1).map((img, i) => (
             <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden">
               <Image
-                src={`/images/${slug}/${img}`}
+                src={`${basePath}/images/${slug}/${img}`}
                 alt={`${name} — photo ${i + 2}`}
                 fill
                 className="object-cover"

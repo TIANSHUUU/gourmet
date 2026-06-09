@@ -4,12 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useLang } from './LanguageContext'
 import type { Restaurant } from '@/lib/restaurants'
+import { basePath } from '@/lib/basePath'
 
 export default function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
   const { lang } = useLang()
   const { slug, name, suburb, city, cuisine_en, cuisine_zh, images } = restaurant
   const cuisine = lang === 'en' ? cuisine_en : cuisine_zh
-  const coverImage = `/images/${slug}/${images[0]}`
+  const coverImage = `${basePath}/images/${slug}/${images[0]}`
 
   return (
     <Link href={`/${slug}`} className="group block">

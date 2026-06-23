@@ -2,16 +2,21 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
+export type Category = 'food' | 'cafe' | 'bar'
+
 export type Restaurant = {
   slug: string
   name: string
   suburb: string
   city: string
-  category: string
+  category: Category
   cuisine_en: string
   cuisine_zh: string
   map_url: string
   map_type: 'google' | 'amap'
+  visited: string // YYYY-MM
+  tagline_en?: string
+  tagline_zh?: string
   images: string[]
   review_en: string
   review_zh: string
@@ -28,14 +33,21 @@ function parseReviews(content: string): { en: string; zh: string } {
   }
 }
 
+export function sortRestaurants(list: Restaurant[]): Restaurant[] {
+  return [...list].sort(
+    (a, b) => b.visited.localeCompare(a.visited) || a.slug.localeCompare(b.slug)
+  )
+}
+
 export function getAllRestaurants(): Restaurant[] {
   const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.md'))
-  return files.map(file => {
+  const list = files.map(file => {
     const raw = fs.readFileSync(path.join(dataDir, file), 'utf-8')
     const { data, content } = matter(raw)
     const { en, zh } = parseReviews(content)
     return { ...data, review_en: en, review_zh: zh } as Restaurant
   })
+  return sortRestaurants(list)
 }
 
 export function getRestaurant(slug: string): Restaurant | undefined {

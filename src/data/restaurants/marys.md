@@ -3,11 +3,14 @@ slug: marys
 name: "Mary's"
 suburb: "Collingwood"
 city: "Melbourne"
-category: restaurant
+category: food
 cuisine_en: "Nigerian"
 cuisine_zh: "尼日利亚菜"
 map_url: "https://www.google.com/maps/search/Mary's+Collingwood+Nigerian"
 map_type: google
+visited: "2026-06"
+tagline_en: "No question — a Collingwood must. Smoky, soulful, gloriously unpretentious."
+tagline_zh: "毫无悬念的 Collingwood 必打卡——烟火气十足，毫不端着。"
 images:
   - "1.jpg"
   - "2.jpg"

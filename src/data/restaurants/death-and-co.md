@@ -3,11 +3,14 @@ slug: death-and-co
 name: "Death & Co Melbourne"
 suburb: "CBD"
 city: "Melbourne"
-category: winebar
+category: bar
 cuisine_en: "Cocktail Bar"
 cuisine_zh: "鸡尾酒吧"
 map_url: "https://www.google.com/maps/place/Death+%26+Co+Melbourne/@-37.8152581,144.968765,17z/data=!3m1!4b1!4m6!3m5!1s0x6ad643a26f65dcb7:0x6422a0d86500b51d!8m2!3d-37.8152624!4d144.9713399!16s%2Fg%2F11zjlzt01c?authuser=0&entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D"
 map_type: google
+visited: "2026-05"
+tagline_en: "Cocktail royalty's first stop down under — dim lights, serious drinks."
+tagline_zh: "鸡尾酒殿堂的首家海外店，灯光昏暗，酒认真得很。"
 images:
   - "1.jpg"
   - "2.jpg"

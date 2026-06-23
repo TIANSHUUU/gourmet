@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useLang } from './LanguageContext'
+import { basePath } from '@/lib/basePath'
 
 export default function Header() {
   const { lang, toggle } = useLang()
@@ -12,8 +14,18 @@ export default function Header() {
   return (
     <header className={`sticky top-0 z-50 header-gradient ${isHome ? '' : 'border-b-[3px] border-[#0F84B5]'}`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="font-display font-bold text-xl tracking-tight text-white hover:opacity-80 transition-opacity">
-          猪比登美食指南🐷🕵️
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <Image
+            src={`${basePath}/logo-mark.png`}
+            alt=""
+            width={38}
+            height={38}
+            priority
+            className="rounded-full ring-2 ring-white/70 shadow-sm"
+          />
+          <span className="font-display font-bold text-xl tracking-tight text-white group-hover:opacity-80 transition-opacity">
+            猪比登美食指南
+          </span>
         </Link>
         <button
           onClick={toggle}

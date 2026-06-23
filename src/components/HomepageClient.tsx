@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Image from 'next/image'
 import type { Restaurant } from '@/lib/restaurants'
 import SearchBar from './SearchBar'
 import RestaurantGrid from './RestaurantGrid'
 import FeaturedCard from './FeaturedCard'
 import CategoryNav, { type CategoryFilter } from './CategoryNav'
 import { useLang } from './LanguageContext'
+import { basePath } from '@/lib/basePath'
 
 export default function HomepageClient({ restaurants }: { restaurants: Restaurant[] }) {
   const { lang } = useLang()
@@ -49,11 +51,25 @@ export default function HomepageClient({ restaurants }: { restaurants: Restauran
       {/* Terracotta hero region (continues from the header) */}
       <section className="header-gradient">
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-8">
-          <h1 className="font-display font-semibold text-white text-4xl md:text-5xl leading-[1.02] max-w-[14ch]">
-            {hero.heading}
-          </h1>
-          <p className="mt-4 text-white/90 max-w-xl">{hero.sub}</p>
-          <div className="mt-7">
+          <div className="md:grid md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:items-center">
+            <div>
+              <h1 className="font-display font-semibold text-white text-4xl md:text-5xl leading-[1.02] max-w-[14ch]">
+                {hero.heading}
+              </h1>
+              <p className="mt-4 text-white/90 max-w-xl">{hero.sub}</p>
+            </div>
+            <div className="mt-7 md:mt-0">
+              <Image
+                src={`${basePath}/scene.jpg`}
+                alt={lang === 'en' ? 'Pineapple-head dining at a Paris natural-wine bistro' : '菠萝头在巴黎自然酒馆吃饭'}
+                width={960}
+                height={960}
+                priority
+                className="w-full max-w-xs md:max-w-sm mx-auto md:ml-auto rounded-2xl ring-1 ring-white/40 shadow-2xl rotate-[-2deg]"
+              />
+            </div>
+          </div>
+          <div className="mt-8">
             <CategoryNav value={category} onChange={setCategory} />
           </div>
         </div>

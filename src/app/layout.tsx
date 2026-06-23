@@ -10,10 +10,20 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export const metadata: Metadata = {
-  title: '猪比登美食指南🐷🕵️',
+  // bare origin only — Next already prefixes the basePath (/gourmet) onto the
+  // opengraph-image file-convention path, so including it here would double it.
+  metadataBase: new URL('https://tianshuuu.github.io/'),
+  title: '猪比登美食指南',
   description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
-  icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐽</text></svg>",
+  openGraph: {
+    title: '猪比登美食指南',
+    description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '猪比登美食指南',
+    description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
   },
 }
 

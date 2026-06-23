@@ -9,12 +9,15 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
   const { lang } = useLang()
   const {
     slug, name, suburb, city, cuisine_en, cuisine_zh,
-    images, review_en, review_zh, map_url,
+    images, review_en, review_zh, map_url, map_type,
   } = restaurant
 
   const cuisine = lang === 'en' ? cuisine_en : cuisine_zh
   const review = lang === 'en' ? review_en : review_zh
   const locationLabel = lang === 'en' ? `${suburb}, ${city}` : `${city} · ${suburb}`
+  const mapLabel = map_type === 'amap'
+    ? (lang === 'en' ? 'Open in Amap' : '在高德地图查看')
+    : (lang === 'en' ? 'Open in Google Maps' : '在谷歌地图查看')
 
   return (
     <article className="max-w-3xl mx-auto px-6 py-10">
@@ -71,7 +74,7 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        {lang === 'en' ? 'Open in Google Maps' : '在谷歌地图查看'}
+        {mapLabel}
       </a>
     </article>
   )

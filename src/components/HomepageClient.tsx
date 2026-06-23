@@ -44,14 +44,11 @@ export default function HomepageClient({ restaurants }: { restaurants: Restauran
           sub: '私藏美食清单，餐厅、咖啡馆与酒吧，全凭真心推荐。',
         }
 
-  const tag = `Melbourne & SA · ${filtered.length} ${lang === 'en' ? (filtered.length === 1 ? 'Entry' : 'Entries') : '家'} · Est. 2026`
-
   return (
     <div>
       {/* Terracotta hero region (continues from the header) */}
-      <section className="bg-[#F0742A]">
-        <div className="max-w-6xl mx-auto px-6 pt-10 pb-8">
-          <p className="font-label text-[11px] uppercase tracking-[0.22em] text-white/85 mb-3">{tag}</p>
+      <section className="header-gradient">
+        <div className="max-w-6xl mx-auto px-6 pt-12 pb-8">
           <h1 className="font-display font-semibold text-white text-4xl md:text-5xl leading-[1.02] max-w-[14ch]">
             {hero.heading}
           </h1>

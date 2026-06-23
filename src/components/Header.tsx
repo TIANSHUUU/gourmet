@@ -10,7 +10,7 @@ export default function Header() {
   const isHome = pathname === '/'
 
   return (
-    <header className={`sticky top-0 z-50 bg-[#F0742A] ${isHome ? '' : 'border-b-[3px] border-[#0F84B5]'}`}>
+    <header className={`sticky top-0 z-50 header-gradient ${isHome ? '' : 'border-b-[3px] border-[#0F84B5]'}`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="font-display font-bold text-xl tracking-tight text-white hover:opacity-80 transition-opacity">
           猪比登美食指南🐷🕵️

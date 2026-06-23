@@ -14,3 +14,18 @@ body {
 /* Editorial heading stack: Latin via Fraunces, CJK falls through to Noto Serif SC */
 .font-display { font-family: var(--font-fraunces), 'Noto Serif SC', Georgia, serif; }
 .font-label { font-family: var(--font-mono), ui-monospace, monospace; }
+
+/* Subtle, chic gradient for the terracotta header/hero region. A soft warm
+   "sun glow" from the top-left fading into deeper terracotta. background-attachment:
+   fixed lets the global header and the homepage hero share one continuous gradient
+   field (each element samples the same viewport-anchored gradient) instead of each
+   restarting its own. */
+.header-gradient {
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='150' height='150' filter='url(%23n)' opacity='0.92'/></svg>"),
+    linear-gradient(125deg, #F0742A 0%, #E06C54 24%, #BE8893 46%, #8B8090 66%, #3C6FB0 85%, #0F84B5 100%);
+  background-size: 150px 150px, cover;
+  background-repeat: repeat, no-repeat;
+  background-attachment: scroll, fixed;
+  background-blend-mode: overlay, normal;
+}

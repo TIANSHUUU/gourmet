@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useLang } from '@/components/LanguageContext'
 import { basePath } from '@/lib/basePath'
+import Lightbox from '@/components/Lightbox'
 import { WINE_UI, pick, type WineUIStrings } from '@/lib/wineI18n'
 import type { WineEntry, WineProfile, WineDetails, Level } from '@/lib/wines'
 
 type Lang = 'en' | 'zh'
+type OpenFn = (i: number) => void
 
 const WASH: Record<string, string> = {
   pink: 'var(--wash-pink)',
@@ -54,14 +57,22 @@ export default function WineDetail({ wine }: { wine: WineEntry }) {
   const { lang } = useLang()
   const ui = WINE_UI[lang]
   const imgs = wine.images?.length ? wine.images : wine.image ? [wine.image] : []
+  const srcs = imgs.map(s => imgSrc(wine.slug, s))
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
   return (
     <>
       <Link className="back-link" href="/wine">{ui.back}</Link>
       <div>
         {imgs.length >= 2
-          ? <Spread wine={wine} imgs={imgs} lang={lang} ui={ui} />
-          : <Hero wine={wine} imgs={imgs} lang={lang} ui={ui} />}
+          ? <Spread wine={wine} imgs={imgs} lang={lang} ui={ui} onOpen={setOpenIndex} />
+          : <Hero wine={wine} imgs={imgs} lang={lang} ui={ui} onOpen={setOpenIndex} />}
       </div>
+      <Lightbox
+        images={srcs}
+        index={openIndex}
+        onClose={() => setOpenIndex(null)}
+        onIndexChange={setOpenIndex}
+      />
     </>
   )
 }
@@ -189,11 +200,12 @@ function Region({ details, lang, ui }: { details: WineDetails; lang: Lang; ui: W
 }
 
 /* ── Layout B: single/none photo — hero + panels ── */
-function Hero({ wine, imgs, lang, ui }: { wine: WineEntry; imgs: string[]; lang: Lang; ui: WineUIStrings }) {
+function Hero({ wine, imgs, lang, ui, onOpen }: { wine: WineEntry; imgs: string[]; lang: Lang; ui: WineUIStrings; onOpen: OpenFn }) {
   const hasPhotos = imgs.length > 0
   const story = pick(wine.story, lang)
   const pairing = pick(wine.pairing, lang)
   const summary = pick(wine.summary, lang)
+  const zoomLabel = lang === 'en' ? 'View photo' : '查看大图'
   const d = wine.details
   return (
     <div className="detail">
@@ -204,8 +216,10 @@ function Hero({ wine, imgs, lang, ui }: { wine: WineEntry; imgs: string[]; lang:
         >
           {hasPhotos
             ? imgs.map((s, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="hero-photo" key={i} src={imgSrc(wine.slug, s)} alt="" />
+                <button key={i} type="button" className="photo-btn" aria-label={zoomLabel} onClick={() => onOpen(i)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="hero-photo" src={imgSrc(wine.slug, s)} alt="" />
+                </button>
               ))
             : <span className="hero-img-fallback">🍷</span>}
         </div>
@@ -270,18 +284,21 @@ function Hero({ wine, imgs, lang, ui }: { wine: WineEntry; imgs: string[]; lang:
 }
 
 /* ── Layout A: 2+ photos — magazine spread ── */
-function Spread({ wine, imgs, lang, ui }: { wine: WineEntry; imgs: string[]; lang: Lang; ui: WineUIStrings }) {
+function Spread({ wine, imgs, lang, ui, onOpen }: { wine: WineEntry; imgs: string[]; lang: Lang; ui: WineUIStrings; onOpen: OpenFn }) {
   const story = pick(wine.story, lang)
   const pairing = pick(wine.pairing, lang)
   const summary = pick(wine.summary, lang)
+  const zoomLabel = lang === 'en' ? 'View photo' : '查看大图'
   const d = wine.details
   return (
     <div className="spread">
       <aside className="gallery">
         {imgs.map((s, i) => (
           <div className="shot" key={i}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgSrc(wine.slug, s)} alt="" />
+            <button type="button" className="photo-btn" aria-label={zoomLabel} onClick={() => onOpen(i)}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imgSrc(wine.slug, s)} alt="" />
+            </button>
           </div>
         ))}
       </aside>

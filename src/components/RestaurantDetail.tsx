@@ -1,10 +1,11 @@
 'use client'
 
-import Image from 'next/image'
+import { useState } from 'react'
 import { useLang } from './LanguageContext'
 import type { Restaurant } from '@/lib/restaurants'
 import { basePath } from '@/lib/basePath'
 import { formatVisited } from '@/lib/format'
+import Lightbox from './Lightbox'
 
 export default function RestaurantDetail({ restaurant }: { restaurant: Restaurant }) {
   const { lang } = useLang()
@@ -13,26 +14,31 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
     images, review_en, review_zh, map_url, map_type, visited,
   } = restaurant
 
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const srcs = images.map(img => `${basePath}/images/${slug}/${img}`)
+
   const cuisine = lang === 'en' ? cuisine_en : cuisine_zh
   const review = lang === 'en' ? review_en : review_zh
   const locationLabel = lang === 'en' ? `${suburb}, ${city}` : `${city} · ${suburb}`
   const visitedLabel = formatVisited(visited, lang)
+  const viewLabel = lang === 'en' ? 'View photo' : '查看大图'
   const mapLabel = map_type === 'amap'
     ? (lang === 'en' ? 'Open in Amap' : '在高德地图查看')
     : (lang === 'en' ? 'Open in Google Maps' : '在谷歌地图查看')
 
   return (
     <article className="max-w-3xl mx-auto px-6 py-10">
-      <div className="relative w-full aspect-[4/3] overflow-hidden mb-8">
-        <Image
-          src={`${basePath}/images/${slug}/${images[0]}`}
-          alt={name}
-          fill
-          priority
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 768px"
-        />
-      </div>
+      {srcs.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setOpenIndex(0)}
+          aria-label={viewLabel}
+          className="block w-full mb-8 cursor-zoom-in"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={srcs[0]} alt={name} className="w-full h-auto rounded-sm" />
+        </button>
+      )}
 
       <div className="flex flex-wrap items-start gap-3 mb-2">
         <h1 className="font-display text-3xl md:text-4xl font-bold text-[#13314A]">{name}</h1>
@@ -47,18 +53,19 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
 
       <p className="text-[#13314A] text-lg leading-relaxed mb-12">{review}</p>
 
-      {images.length > 1 && (
-        <div className="grid grid-cols-2 gap-3 mb-12">
-          {images.slice(1).map((img, i) => (
-            <div key={i} className="relative aspect-[4/3] overflow-hidden">
-              <Image
-                src={`${basePath}/images/${slug}/${img}`}
-                alt={`${name} — photo ${i + 2}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 350px"
-              />
-            </div>
+      {srcs.length > 1 && (
+        <div className="columns-1 sm:columns-2 gap-3 mb-12">
+          {srcs.slice(1).map((src, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setOpenIndex(i + 1)}
+              aria-label={viewLabel}
+              className="block w-full mb-3 break-inside-avoid cursor-zoom-in"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt={`${name} — photo ${i + 2}`} className="w-full h-auto rounded-sm" />
+            </button>
           ))}
         </div>
       )}
@@ -75,6 +82,13 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
         </svg>
         {mapLabel}
       </a>
+
+      <Lightbox
+        images={srcs}
+        index={openIndex}
+        onClose={() => setOpenIndex(null)}
+        onIndexChange={setOpenIndex}
+      />
     </article>
   )
 }

@@ -1,0 +1,100 @@
+{
+  "entries": [
+    {
+      "slug": "yangarra-old-vine-grenache-2021",
+      "date": "2026-06-28",
+      "wine_name": { "zh": "扬加拉 老藤歌海娜 2021", "en": "Yangarra Old Vine Grenache 2021" },
+      "winery": { "zh": "扬加拉酒庄", "en": "Yangarra Estate" },
+      "color": "pink",
+      "wine_type": "red",
+      "price_aud": "45.00",
+      "url": "https://www.yangarra.com",
+      "tags": [
+        { "zh": "澳大利亚", "en": "Australia" },
+        { "zh": "歌海娜", "en": "Grenache" },
+        { "zh": "有机", "en": "Organic" }
+      ],
+      "flavours": [
+        { "icon": "🍓", "label": { "zh": "草莓", "en": "Strawberry" } },
+        { "icon": "🌹", "label": { "zh": "干玫瑰", "en": "Dried rose" } },
+        { "icon": "🌿", "label": { "zh": "地中海灌木", "en": "Garrigue" } }
+      ],
+      "story": {
+        "zh": "麦克拉伦谷的老藤歌海娜，颜色浅得像放大版桃红，别被骗了——香气一上来就是熟透的草莓加一把干香草。\n\n入口轻盈多汁，单宁细得几乎察觉不到，微微的胡椒尾韵让它一点都不腻。冰镇十五分钟再喝，夏天傍晚神器。",
+        "en": "An old-vine Grenache from McLaren Vale, so pale it looks like a rosé that hit the gym — don't be fooled. The nose is all ripe strawberry and a fistful of dried herbs.\n\nLight and juicy on the palate, tannins so fine you barely notice them, with a peppery lift on the finish that keeps it from ever feeling heavy. Fifteen minutes in the fridge and it's a summer-evening hero."
+      },
+      "pairing": {
+        "zh": "微微冰镇后配炭火羊排、番茄冷盘，或者就着一盘火腿也行。",
+        "en": "Lightly chilled, with lamb off the grill, a tomato salad — or honestly just a plate of jamón."
+      },
+      "profile": { "body": "medium", "tannin": "low", "acidity": "medium", "sweetness": "low" },
+      "summary": {
+        "zh": "浅色不代表清淡——多汁草莓、细腻单宁、胡椒尾韵，冰一冰就是夏夜万金油。",
+        "en": "Pale but not shy — juicy strawberry, silky tannins, a peppery finish. Chill it and it goes with anything."
+      },
+      "details": {
+        "producer": "Yangarra Estate Vineyard",
+        "country": { "zh": "澳大利亚", "en": "Australia" },
+        "flag": "🇦🇺",
+        "region": { "zh": "麦克拉伦谷，南澳", "en": "McLaren Vale, South Australia" },
+        "varieties": { "zh": "歌海娜", "en": "Grenache" },
+        "alcohol": "14.5%",
+        "vintage": "2021",
+        "size": "750 ml",
+        "closure": { "zh": "螺旋盖", "en": "Screw cap" },
+        "notes": {
+          "zh": "麦克拉伦谷位于阿德莱德以南，地中海式气候加上古老砂质土壤，是南澳歌海娜与罗讷风格红酒的宝地。",
+          "en": "McLaren Vale, just south of Adelaide, pairs a Mediterranean climate with ancient sandy soils — prime country for South Australian Grenache and Rhône-style reds."
+        },
+        "map_url": "https://www.google.com/maps/place/McLaren+Vale+SA"
+      }
+    },
+    {
+      "slug": "les-capriades-pet-nat-piege-a-filles",
+      "date": "2026-05-10",
+      "wine_name": { "zh": "卡普里亚德 「少女陷阱」气泡", "en": "Les Capriades Pétillant « Piège à Filles »" },
+      "winery": { "zh": "卡普里亚德", "en": "Les Capriades" },
+      "color": "green",
+      "wine_type": "sparkling",
+      "price_aud": "52.00",
+      "tags": [
+        { "zh": "法国", "en": "France" },
+        { "zh": "自然酒", "en": "Natural wine" },
+        { "zh": "祖传法气泡", "en": "Pét-Nat" }
+      ],
+      "flavours": [
+        { "icon": "🍏", "label": { "zh": "青苹果", "en": "Green apple" } },
+        { "icon": "🍞", "label": { "zh": "烤面包", "en": "Brioche" } },
+        { "icon": "🌼", "label": { "zh": "洋甘菊", "en": "Chamomile" } }
+      ],
+      "story": {
+        "zh": "卢瓦尔河谷祖传法气泡（Pét-Nat）名门，开瓶记得小心——气很足，跑得比你手快。\n\n气泡细腻，青苹果加一点面包发酵香，酸度爽脆但不咬人，尾巴干净带一丝洋甘菊花香。不装、不端着，就是让人一杯接一杯的那种酒。",
+        "en": "A benchmark pét-nat from a Loire cult producer — open it carefully, there's a lot of gas and it moves faster than your hand.\n\nFine bubbles, green apple and a little bready lees character, crisp acidity that never bites, and a clean finish with a whisper of chamomile. No airs, no pretension — just the kind of bottle that empties itself one glass at a time."
+      },
+      "pairing": {
+        "zh": "一晚的开胃第一杯，配炸物、生蚝，或者只配好心情。",
+        "en": "The first pour of the night — with anything fried, fresh oysters, or just good company."
+      },
+      "profile": { "body": "low", "tannin": "low", "acidity": "high", "sweetness": "low" },
+      "summary": {
+        "zh": "细泡、脆酸、青苹果加烤面包香——毫无距离感的开胃气泡，一开就见底。",
+        "en": "Fine bubbles, crisp acidity, green apple and brioche — an approachable aperitif fizz that disappears fast."
+      },
+      "details": {
+        "producer": "Les Capriades (Pascal Potaire & Moses Gadouche)",
+        "country": { "zh": "法国", "en": "France" },
+        "flag": "🇫🇷",
+        "region": { "zh": "卢瓦尔河谷", "en": "Loire Valley" },
+        "varieties": { "zh": "白诗南 / 默尼耶皮诺", "en": "Chenin Blanc / Menu Pineau" },
+        "alcohol": "12%",
+        "vintage": "NV",
+        "size": "750 ml",
+        "closure": { "zh": "皇冠盖", "en": "Crown cap" },
+        "notes": {
+          "zh": "卡普里亚德是卢瓦尔河谷祖传法（méthode ancestrale）气泡的标杆，一次发酵在瓶中完成，不加糖不加酵母，天然带气。",
+          "en": "Les Capriades is a reference point for méthode ancestrale in the Loire — a single fermentation finished in the bottle, no added sugar or yeast, naturally sparkling."
+        }
+      }
+    }
+  ]
+}

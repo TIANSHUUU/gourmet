@@ -5,11 +5,19 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useLang } from './LanguageContext'
 import { basePath } from '@/lib/basePath'
+import { WINE_UI } from '@/lib/wineI18n'
 
 export default function Header() {
   const { lang, toggle } = useLang()
   const pathname = usePathname()
   const isHome = pathname === '/'
+  const isWine = pathname.startsWith('/wine')
+  const ui = WINE_UI[lang]
+
+  const navClass = (active: boolean) =>
+    `font-label text-xs uppercase tracking-widest pb-1 border-b-2 transition-colors ${
+      active ? 'border-white text-white font-semibold' : 'border-transparent text-white/70 hover:text-white'
+    }`
 
   return (
     <header className={`sticky top-0 z-50 header-gradient ${isHome ? '' : 'border-b-[3px] border-[#0F84B5]'}`}>
@@ -27,12 +35,18 @@ export default function Header() {
             猪比登美食指南
           </span>
         </Link>
-        <button
-          onClick={toggle}
-          className="font-label text-xs uppercase tracking-widest px-3 py-1.5 rounded-full border border-white text-white hover:bg-white hover:text-[#F0742A] transition-all duration-200"
-        >
-          {lang === 'en' ? '中文' : 'EN'}
-        </button>
+        <div className="flex items-center gap-4 sm:gap-5">
+          <nav className="flex items-center gap-3 sm:gap-4">
+            <Link href="/" className={navClass(!isWine)}>{ui.navRestaurants}</Link>
+            <Link href="/wine" className={navClass(isWine)}>{ui.navWine}</Link>
+          </nav>
+          <button
+            onClick={toggle}
+            className="font-label text-xs uppercase tracking-widest px-3 py-1.5 rounded-full border border-white text-white hover:bg-white hover:text-[#F0742A] transition-all duration-200"
+          >
+            {lang === 'en' ? '中文' : 'EN'}
+          </button>
+        </div>
       </div>
     </header>
   )

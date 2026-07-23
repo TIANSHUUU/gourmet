@@ -6,7 +6,7 @@ city: "Aomori"
 category: food
 cuisine_en: "Pastry Shop"
 cuisine_zh: "甜品店"
-map_url: "https://www.google.com/maps/place/Soma+Pastry+Shop/@40.6150847,141.2024399,17z/data=!4m8!3m7!1s0x5f9b42487dd891f5:0xcc434d45722b0cdb!8m2!3d40.6150807!4d141.2050148!9m1!1b1!16s%2Fg%2F1tf6rmnt?entry=ttu&g_ep=EgoyMDI2MDcxOS4wIKXMDSoASAFQAw%3D%3D"
+map_url: "https://www.google.com/maps/place/Soma+Pastry+Shop/@40.6150807,141.2024399,17z/data=!3m1!4b1!4m6!3m5!1s0x5f9b42487dd891f5:0xcc434d45722b0cdb!8m2!3d40.6150807!4d141.2050148!16s%2Fg%2F1tf6rmnt?entry=ttu&g_ep=EgoyMDI2MDcxOS4wIKXMDSoASAFQAw%3D%3D"
 map_type: google
 visited: "2025-02"
 tagline_en: "Aomori's apple-pie champion — Shōwa charm, takeaway only."

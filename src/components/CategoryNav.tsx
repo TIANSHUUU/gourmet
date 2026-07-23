@@ -7,7 +7,7 @@ export type CategoryFilter = 'all' | Category
 
 const LABELS: Record<CategoryFilter, { en: string; zh: string }> = {
   all: { en: 'All', zh: '全部' },
-  food: { en: 'Food', zh: '餐厅' },
+  food: { en: 'Food', zh: '美食' },
   cafe: { en: 'Cafés', zh: '咖啡' },
   bar: { en: 'Bars', zh: '酒吧' },
 }

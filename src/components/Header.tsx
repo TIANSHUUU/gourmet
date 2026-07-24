@@ -21,21 +21,22 @@ export default function Header() {
 
   return (
     <header className={`sticky top-0 z-50 header-gradient ${isHome ? '' : 'border-b-[3px] border-[#0F84B5]'}`}>
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <Link href="/" className="flex items-center gap-2.5 group min-w-0">
           <Image
             src={`${basePath}/logo-mark.png`}
             alt=""
             width={38}
             height={38}
             priority
-            className="rounded-full ring-2 ring-white/70 shadow-sm"
+            className="rounded-full ring-2 ring-white/70 shadow-sm shrink-0"
           />
-          <span className="font-display font-bold text-xl tracking-tight text-white group-hover:opacity-80 transition-opacity">
-            菠萝子美食指南
+          <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-white whitespace-nowrap group-hover:opacity-80 transition-opacity">
+            <span className="sm:hidden">菠萝子</span>
+            <span className="hidden sm:inline">菠萝子美食指南</span>
           </span>
         </Link>
-        <div className="flex items-center gap-4 sm:gap-5">
+        <div className="flex items-center gap-3 sm:gap-5 shrink-0">
           <nav className="flex items-center gap-3 sm:gap-4">
             <Link href="/" className={navClass(!isWine)}>{ui.navRestaurants}</Link>
             <Link href="/wine" className={navClass(isWine)}>{ui.navWine}</Link>

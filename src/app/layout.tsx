@@ -13,16 +13,16 @@ export const metadata: Metadata = {
   // bare origin only — Next already prefixes the basePath (/gourmet) onto the
   // opengraph-image file-convention path, so including it here would double it.
   metadataBase: new URL('https://tianshuuu.github.io/'),
-  title: '猪比登美食指南',
+  title: '菠萝子美食指南',
   description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
   openGraph: {
-    title: '猪比登美食指南',
+    title: '菠萝子美食指南',
     description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '猪比登美食指南',
+    title: '菠萝子美食指南',
     description: 'A personal guide to restaurants, cafés & bars worth revisiting.',
   },
 }

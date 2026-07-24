@@ -36,5 +36,5 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 
 ## Style
 - Background `#FAFAF7`, accent/terracotta `#C84B2F`, rounded-2xl cards
-- Site name: "猪比登美食指南🐷🕵️", favicon is 🐽 emoji
+- Site name: "菠萝子美食指南" (renamed 2026-07 from 猪比登 to match the pineapple avatar). Logo = cropped pineapple-head mark (`public/logo-mark.png`); favicon = pineapple (`src/app/icon.png`). The old 🐷🕵️/🐽 emojis were dropped.
 - Footer contact: alubiaroja529@gmail.com

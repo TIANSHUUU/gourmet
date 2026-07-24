@@ -32,7 +32,7 @@ export default function Header() {
             className="rounded-full ring-2 ring-white/70 shadow-sm"
           />
           <span className="font-display font-bold text-xl tracking-tight text-white group-hover:opacity-80 transition-opacity">
-            猪比登美食指南
+            菠萝子美食指南
           </span>
         </Link>
         <div className="flex items-center gap-4 sm:gap-5">

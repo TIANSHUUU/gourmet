@@ -33,7 +33,7 @@ export type WineUIStrings = {
 
 export const WINE_UI: Record<'en' | 'zh', WineUIStrings> = {
   en: {
-    navRestaurants: 'Restaurants',
+    navRestaurants: 'Food',
     navWine: 'Wine',
     listTitle: 'Wine Diary',
     listIntro: "Every bottle I've opened — and written down.",
@@ -69,7 +69,7 @@ export const WINE_UI: Record<'en' | 'zh', WineUIStrings> = {
     notFound: 'Entry not found',
   },
   zh: {
-    navRestaurants: '餐厅',
+    navRestaurants: '美食',
     navWine: '酒评',
     listTitle: '酒评日记',
     listIntro: '每一瓶我开过、写下来的酒。',

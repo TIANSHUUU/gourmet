@@ -32,8 +32,7 @@ export default function Header() {
             className="rounded-full ring-2 ring-white/70 shadow-sm shrink-0"
           />
           <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-white whitespace-nowrap group-hover:opacity-80 transition-opacity">
-            <span className="sm:hidden">菠萝子</span>
-            <span className="hidden sm:inline">菠萝子美食指南</span>
+            菠萝子美食指南
           </span>
         </Link>
         <div className="flex items-center gap-3 sm:gap-5 shrink-0">

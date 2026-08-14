@@ -42,3 +42,8 @@ next-env.d.ts
 
 # brainstorming visual companion
 .superpowers/
+
+# field notes (独立 Worker 的本地产物)
+notes-app/.dev.vars
+notes-app/.wrangler/
+field-notes/*/photos/

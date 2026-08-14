@@ -1,6 +1,48 @@
 {
   "entries": [
     {
+      "slug": "muto-touriga-nacional-2022",
+      "date": "2026-08-14",
+      "wine_name": { "zh": "Muto 国产多瑞加 2022", "en": "Muto Touriga Nacional 2022" },
+      "winery": { "zh": "Muto 酒庄", "en": "Muto Wines" },
+      "color": "blue",
+      "wine_type": "red",
+      "tags": [
+        { "zh": "澳大利亚", "en": "Australia" },
+        { "zh": "国产多瑞加", "en": "Touriga Nacional" },
+        { "zh": "自然酒", "en": "Natural wine" }
+      ],
+      "flavours": [
+        { "icon": "🌶️", "label": { "zh": "黑胡椒", "en": "Black pepper" } },
+        { "icon": "🌿", "label": { "zh": "草本", "en": "Herbal" } },
+        { "icon": "🍒", "label": { "zh": "冰糖山楂", "en": "Candied hawthorn" } }
+      ],
+      "story": {
+        "zh": "黑胡椒和野草本气息一股脑冲出来，却还稳稳兜着那口冰糖山楂般的酸甜果味，单宁又软得不像话——真的绝了🤯。喝过 Muto 家这么多款红酒，这一支大概刚刚把黑皮诺挤下去，登顶我心里的 Muto 红酒最爱榜。\n\n100% 国产多瑞加，来自 Barmera 一处有机兼生物动力的 Bassham 家族园。大部分整串入罐，野生酵母发酵、辅以脚踩破皮，早晚各手工压帽一次，再篮式压榨进旧橡木大桶（仅 10% 新桶）陈酿十个月。最后由家族亲手装瓶，几乎不加二氧化硫——不折不扣的自然酒。",
+        "en": "Black pepper and wild herbs come barrelling out, and yet it still hangs onto this candied-hawthorn sweet-and-sour fruit, tannins soft as you like — genuinely mind-blowing 🤯. Of all the Muto reds I've worked my way through, this one might have just bumped the Pinot off the top spot.\n\nIt's 100% Touriga Nacional off the Bassham family's organic, biodynamic vineyard in Barmera — mostly whole-bunch, wild-fermented with a bit of foot-treading, hand-plunged morning and night, then basket-pressed to old puncheons (just 10% new oak) for ten months. Bottled by the family's own hands with barely any added sulphur. Natural wine that actually delivers."
+      },
+      "pairing": {
+        "zh": "配韩式烤肉（Bulgogi）——薄切牛肉的蒜香和那一点点甜，正好接住酒里的黑胡椒与草本香气。",
+        "en": "With Korean bulgogi — the garlic and gentle sweetness of the thin-sliced beef catch the wine's black pepper and herbal side just right."
+      },
+      "details": {
+        "producer": "Muto Wines",
+        "country": { "zh": "澳大利亚", "en": "Australia" },
+        "flag": "🇦🇺",
+        "region": { "zh": "河地，南澳", "en": "Riverland, South Australia" },
+        "varieties": { "zh": "国产多瑞加", "en": "Touriga Nacional" },
+        "alcohol": "13.0%",
+        "vintage": "2022",
+        "size": "750 ml",
+        "notes": {
+          "zh": "河地（Riverland）是南澳产量最大的葡萄酒产区，沿墨累河铺开，气候炎热干燥。过去以量取胜，如今聚集了越来越多做自然酒、玩小众品种的小酒庄。Barmera 则是产区里临 Bonney 湖的一座小镇。",
+          "en": "The Riverland is South Australia's largest wine region by volume, sprawling along the Murray River under a hot, dry sky. Long a bulk-wine workhorse, it's now a magnet for small producers making natural wine and alternative varieties. Barmera is a little town on Lake Bonney right in the thick of it."
+        },
+        "map_url": "https://www.google.com/maps/place/Barmera+SA+5345/@-34.2326069,140.3887239,12z/data=!3m1!4b1!4m6!3m5!1s0x6ac730f54f82e029:0x4033654628ed150!8m2!3d-34.2521579!4d140.4651006!16zL20vMGJydmRm?entry=ttu&g_ep=EgoyMDI2MDgxMS4wIKXMDSoASAFQAw%3D%3D"
+      },
+      "images": ["1.jpg", "2.jpg"]
+    },
+    {
       "slug": "yangarra-old-vine-grenache-2021",
       "date": "2026-06-28",
       "wine_name": { "zh": "扬加拉 老藤歌海娜 2021", "en": "Yangarra Old Vine Grenache 2021" },

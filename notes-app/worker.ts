@@ -241,7 +241,16 @@ export default {
           // 因此正文也扫一遍。8 秒超时,页面卡死也不能让手机一直转圈
           const res = await fetch(target, { redirect: 'follow', signal: AbortSignal.timeout(8000) });
           finalUrl = res.url || target;
-          if (!extractCoords(finalUrl)) bodyText = (await res.text()).slice(0, 200_000);
+          // 跟随重定向后再核一次落点域名:goo.gl 理论上可被做成开放重定向,
+          // 落点非白名单时绝不读它的正文(避免把任意主机的内容反射回来),
+          // 只从 URL 本身抠坐标——那是纯正则,无副作用
+          let finalHostOk = false;
+          try {
+            finalHostOk = isAllowedMapsHost(new URL(finalUrl));
+          } catch {
+            finalHostOk = false;
+          }
+          if (finalHostOk && !extractCoords(finalUrl)) bodyText = (await res.text()).slice(0, 200_000);
         } catch {
           // 含超时触发的 AbortError——统一当成"打不开"处理,不把 abort 抛给上层变成 500
           return json({ error: '打不开这个链接' }, 502);

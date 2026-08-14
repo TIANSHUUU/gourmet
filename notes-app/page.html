@@ -653,7 +653,7 @@ async function openNote(kind, id) {
 }
 
 $('delNote').onclick = async () => {
-  if (!note.kind || !confirm('连同照片一起删掉?')) return;
+  if (!confirm('连同照片一起删掉?')) return;
   try {
     await api(`/api/notes/${encodeURIComponent(note.kind)}/${encodeURIComponent(note.id)}`, { method: 'DELETE' });
     localStorage.removeItem(DRAFT);

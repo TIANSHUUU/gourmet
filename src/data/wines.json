@@ -7,6 +7,7 @@
       "winery": { "zh": "Muto 酒庄", "en": "Muto Wines" },
       "color": "blue",
       "wine_type": "red",
+      "price_aud": "24.00",
       "tags": [
         { "zh": "澳大利亚", "en": "Australia" },
         { "zh": "国产多瑞加", "en": "Touriga Nacional" },
@@ -34,6 +35,7 @@
         "alcohol": "13.0%",
         "vintage": "2022",
         "size": "750 ml",
+        "closure": { "zh": "螺旋盖", "en": "Screw cap" },
         "notes": {
           "zh": "河地（Riverland）是南澳产量最大的葡萄酒产区，沿墨累河铺开，气候炎热干燥。过去以量取胜，如今聚集了越来越多做自然酒、玩小众品种的小酒庄。Barmera 则是产区里临 Bonney 湖的一座小镇。",
           "en": "The Riverland is South Australia's largest wine region by volume, sprawling along the Murray River under a hot, dry sky. Long a bulk-wine workhorse, it's now a magnet for small producers making natural wine and alternative varieties. Barmera is a little town on Lake Bonney right in the thick of it."

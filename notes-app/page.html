@@ -142,10 +142,16 @@ const say = (t) => { $('status').textContent = t; };
 // 存进 Safari 的 token 到了独立 app 里读不到。所以 token 必须留在 URL 里、随图标一起
 // 被保存,每次启动都从 hash 重新读一遍——这里不再抹掉 #t=。独立 app 没有地址栏,token
 // 天然看不见;只有在 Safari 标签页里才会显示。
-const hashToken = new URLSearchParams(location.hash.slice(1)).get('t');
-if (hashToken) localStorage.setItem('notes_token', hashToken);
-const TOKEN = hashToken || localStorage.getItem('notes_token') || '';
-if (!TOKEN) say('缺少 token,请用带 #t=... 的链接打开一次');
+// token 从 ?t= 或 #t= 带入,落进 localStorage。用 ?t=(query)而不是 #t=(fragment):
+// iOS「添加到主屏」的独立 app 有自己独立的 localStorage(和 Safari 不互通),而且会吞掉
+// URL 里的 #fragment——只有 ?query 能随图标一起存下、每次启动读得到。#t= 仍兼容读取。
+// 代价:?t= 会出现在首个页面 GET 请求里(仅 Cloudflare 边缘短暂可见,不进网站、不进 Referer);
+// 对个人工具可接受,换来主屏 app 真的能用。独立 app 没有地址栏,token 平时看不见。
+const urlToken = new URLSearchParams(location.search).get('t')
+  || new URLSearchParams(location.hash.slice(1)).get('t');
+if (urlToken) localStorage.setItem('notes_token', urlToken);
+const TOKEN = urlToken || localStorage.getItem('notes_token') || '';
+if (!TOKEN) say('缺少 token,请用带 ?t=... 的链接打开一次');
 
 async function api(path, opts = {}) {
   const res = await fetch(path, {

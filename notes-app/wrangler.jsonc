@@ -1,0 +1,8 @@
+// gourmet 现场笔记 Worker(与主站 Next.js 完全独立)
+{
+  "name": "gourmet-notes",
+  "main": "worker.ts",
+  "compatibility_date": "2026-07-01",
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": false }],
+  "r2_buckets": [{ "binding": "NOTES", "bucket_name": "gourmet-notes" }]
+}

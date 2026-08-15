@@ -1,0 +1,676 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>gourmet 笔记</title>
+<style>
+  :root { --bg:#faf9f5; --card:#fff; --line:#e4e1d8; --muted:#8a8880; --ink:#2c2c2a; --accent:#185fa5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1a1a19; --card:#242423; --line:#3a3a38; --muted:#98968e; --ink:#eeece6; --accent:#85b7eb; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif; }
+  header { position:sticky; top:0; z-index:9; display:flex; align-items:center; justify-content:space-between;
+           padding:max(8px,env(safe-area-inset-top)) 14px 8px; background:var(--card); border-bottom:1px solid var(--line); }
+  header button { border:0; background:none; color:var(--accent); font-size:15px; padding:6px 2px; }
+  main { padding:14px; max-width:640px; margin:0 auto; }
+  label { display:block; font-size:12px; color:var(--muted); margin:14px 0 4px; }
+  input, textarea, select { width:100%; padding:9px 10px; font-size:16px; color:var(--ink);
+    background:var(--card); border:1px solid var(--line); border-radius:8px; }
+  textarea { min-height:96px; resize:vertical; }
+  .row { display:flex; gap:8px; }
+  .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .grid4 label { margin:0 0 2px; text-align:center; }
+  .grid4 input { text-align:center; padding:8px 4px; }
+  .seg { display:flex; gap:6px; margin-bottom:6px; }
+  .seg button { flex:0 0 auto; padding:6px 12px; font-size:13px; border:1px solid var(--line);
+    background:var(--card); color:var(--muted); border-radius:8px; }
+  .seg button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tags { display:flex; flex-wrap:wrap; gap:6px; }
+  .tag { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; font-size:13px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; }
+  .tag b { font-weight:400; color:var(--muted); }
+  details { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; }
+  summary { font-size:13px; color:var(--muted); }
+  #status { font-size:13px; color:var(--muted); min-height:20px; padding:8px 0; }
+  .btn { padding:9px 14px; font-size:14px; background:var(--card); color:var(--ink);
+    border:1px solid var(--line); border-radius:8px; }
+
+  .photos { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .photos figure { margin:0; }
+  .photos img, .photos .add { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; display:block; }
+  .photos .add { display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--muted);
+    background:var(--card); border:1px dashed var(--line); }
+  .photos input { font-size:12px; padding:5px 6px; margin-top:4px; }
+  .photos .del { width:100%; margin-top:4px; padding:6px 0; font-size:12px; color:var(--muted); background:none; border:0; }
+
+  .item { display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+  /* 列表摘要不带照片文件名(见 worker.ts summaryOf),要缩略图得为每条笔记多发一次 /api/photos 请求——
+     业主用的是 R2 免费额度,列表可能一次展示几十条,不值当。.ph 改成显示张数,占位但不是空占位 */
+  .item .ph { width:52px; height:52px; border-radius:6px; flex:0 0 auto; display:flex; align-items:center;
+    justify-content:center; font-size:15px; color:var(--muted); background:var(--card); border:1px solid var(--line); }
+  .item div { min-width:0; flex:1; }
+  .item b { display:block; font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item span { font-size:12px; color:var(--muted); }
+</style>
+
+<header>
+  <button id="back" type="button" hidden>‹ 列表</button>
+  <strong id="head" style="font-size:15px">新笔记</strong>
+  <button id="save" type="button">保存</button>
+</header>
+
+<main>
+  <div id="list" hidden></div>
+  <div id="editor" hidden>
+    <div class="seg">
+      <button type="button" data-kind="wine" aria-pressed="true">🍷 酒</button>
+      <button type="button" data-kind="place" aria-pressed="false">🍽️ 店</button>
+    </div>
+
+    <label for="at">时间</label>
+    <input id="at" type="datetime-local" />
+
+    <label for="title">标题 *</label>
+    <input id="title" placeholder="酒名 / 店名" />
+
+    <label for="body">正文</label>
+    <textarea id="body" placeholder="想到什么写什么"></textarea>
+
+    <div id="wineBlock">
+      <label>风味关键词</label>
+      <div class="tags" id="flavours"></div>
+
+      <label for="winery">酒庄</label>
+      <input id="winery" placeholder="Muto Wines" />
+
+      <label for="wine_type">类型</label>
+      <select id="wine_type">
+        <option value="">未填</option><option value="red">红</option><option value="white">白</option>
+        <option value="rose">桃红</option><option value="sparkling">气泡</option>
+      </select>
+
+      <div class="grid4" style="margin-top:14px">
+        <div><label for="vintage">年份</label><input id="vintage" inputmode="numeric" /></div>
+        <div><label for="abv">ABV</label><input id="abv" placeholder="13%" /></div>
+        <div style="grid-column:span 2"><label for="price_aud">价格 AUD</label><input id="price_aud" inputmode="decimal" /></div>
+      </div>
+
+      <label for="varieties">品种</label>
+      <input id="varieties" placeholder="Touriga Nacional" />
+      <label for="region">产区</label>
+      <input id="region" placeholder="Riverland, SA" />
+      <label for="pairing">配餐</label>
+      <input id="pairing" placeholder="配了什么吃的" />
+    </div>
+
+    <div id="venueBlock">
+      <label>招牌菜 / 关键词</label>
+      <div class="tags" id="dishes"></div>
+
+      <label for="category">类别</label>
+      <select id="category">
+        <option value="">未填</option><option value="food">美食</option>
+        <option value="cafe">咖啡</option><option value="bar">酒吧</option>
+      </select>
+
+      <label for="cuisine">菜系</label>
+      <input id="cuisine" placeholder="尼日利亚菜" />
+
+      <label for="gmaps">地点(Google Maps 链接)</label>
+      <div class="row">
+        <input id="gmaps" style="flex:1;min-width:0" placeholder="贴 Google Maps 链接" />
+        <button class="btn" id="here" type="button">当前</button>
+      </div>
+      <div id="placeInfo" style="font-size:12px;color:var(--muted);padding-top:4px"></div>
+      <input id="coords" style="margin-top:6px" placeholder="解析不出时手填:经度, 纬度" />
+    </div>
+
+    <button class="btn" id="delNote" type="button" style="margin-top:14px;color:#a32d2d">删除这条笔记</button>
+
+    <div id="photoBlock"></div>
+    <div id="status"></div>
+  </div>
+</main>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const say = (t) => { $('status').textContent = t; };
+
+// token:首访由 #t= 带入。用 fragment 而不是 ?t=,因为 fragment 永远不上送服务器,
+// 既不进 Cloudflare 请求日志也不会出现在 Referer 里——token 从头到尾不离开这台手机。
+const hashToken = new URLSearchParams(location.hash.slice(1)).get('t');
+if (hashToken) {
+  localStorage.setItem('notes_token', hashToken);
+  history.replaceState(null, '', location.pathname); // 顺手抹掉地址栏,免得被存成主屏图标的启动地址
+}
+const TOKEN = localStorage.getItem('notes_token') || '';
+if (!TOKEN) say('缺少 token,请用带 #t=... 的链接打开一次');
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'X-Notes-Token': TOKEN, ...(opts.headers || {}) },
+  });
+  if (!res.ok) {
+    // Worker 出错时返回 JSON({error, issues?}),别把这坨 JSON 原样甩给业主——
+    // 挑出 error 文本,zod 的 issues 只在真出现(理论上已被下面的前端校验拦掉)时补一句字段提示
+    let msg = `请求失败(状态码 ${res.status})`;
+    try {
+      const body = await res.json();
+      if (body && typeof body.error === 'string') {
+        msg = body.error;
+        const first = Array.isArray(body.issues) ? body.issues[0] : null;
+        if (first) {
+          const field = Array.isArray(first.path) ? first.path.join('.') : '';
+          msg += field ? `(${field}:${first.message})` : `:${first.message}`;
+        }
+      }
+    } catch {
+      // 响应不是 JSON(网络层错误页之类),退回状态码提示
+    }
+    throw new Error(msg);
+  }
+  return res.headers.get('content-type')?.includes('json') ? res.json() : res;
+}
+
+// ——— 当前编辑中的笔记 ———
+const newId = () => `${new Date().toISOString().replace(/[:.]/g, '-')}-${Math.random().toString(36).slice(2, 6)}`;
+
+/** datetime-local 的值 + 本机时区偏移 → 带偏移的 ISO,如 2026-09-03T14:30:00+08:00 */
+function withOffset(local) {
+  if (!local) throw new Error('请填时间');
+  const off = -new Date().getTimezoneOffset();
+  const sign = off >= 0 ? '+' : '-';
+  const pad = (n) => String(Math.floor(Math.abs(n))).padStart(2, '0');
+  return `${local}:00${sign}${pad(off / 60)}:${pad(off % 60)}`;
+}
+const toLocalInput = (d) =>
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+let note = null;
+let tags = { flavours: [], dishes: [] };
+
+function blankNote() {
+  return {
+    id: newId(),
+    kind: localStorage.getItem('notes_last_kind') || 'wine',
+    at: '',
+    title: '',
+    place: { name: '', gmaps_url: '', coords: null },
+    body: '',
+    wine: {},
+    venue: {},
+    photos: [],
+  };
+}
+
+// 拿到值之后怎么处理和"怎么问业主要值"分开,前者是纯逻辑,后者才依赖 prompt() 这个原生 UI
+function addTag(key, value) {
+  if (value && value.trim()) { tags[key].push(value.trim()); renderTags(key); saveDraft(); }
+}
+
+function renderTags(key) {
+  const el = $(key);
+  el.innerHTML = '';
+  tags[key].forEach((v, i) => {
+    const s = document.createElement('span');
+    s.className = 'tag';
+    // 这里的 v 是业主手输的文本,絶不能用 innerHTML 拼——即使只有业主自己会打字,
+    // 一个不小心带 < 的标签(比如 "<8m 能见度") 也不该被当成标签解析
+    s.append(document.createTextNode(v + ' '));
+    const del = document.createElement('b');
+    del.textContent = '✕';
+    del.onclick = () => { tags[key].splice(i, 1); renderTags(key); saveDraft(); };
+    s.append(del);
+    el.append(s);
+  });
+  const add = document.createElement('button');
+  add.type = 'button';
+  add.className = 'tag';
+  add.style.borderStyle = 'dashed';
+  add.textContent = '＋ 加';
+  add.onclick = () => addTag(key, prompt(key === 'flavours' ? '风味关键词?' : '招牌菜 / 关键词?'));
+  el.append(add);
+}
+
+function fillForm(n) {
+  clearThumbCache(); // 切换到另一条笔记(或新建/恢复草稿),上一条笔记缓存的 objectURL 不会再用到,及时还给浏览器
+  note = n;
+  $('at').value = n.at ? n.at.slice(0, 16) : toLocalInput(new Date());
+  $('title').value = n.title;
+  $('body').value = n.body || '';
+  $('gmaps').value = n.place?.gmaps_url || '';
+  setPlace(n.place || { name: '', gmaps_url: '', coords: null });
+  for (const k of ['winery', 'vintage', 'abv', 'varieties', 'region', 'price_aud', 'pairing']) {
+    $(k).value = n.wine?.[k] ?? '';
+  }
+  $('wine_type').value = n.wine?.wine_type ?? '';
+  $('cuisine').value = n.venue?.cuisine ?? '';
+  $('category').value = n.venue?.category ?? '';
+  tags = {
+    flavours: n.wine?.flavours ? [...n.wine.flavours] : [],
+    dishes: n.venue?.dishes ? [...n.venue.dishes] : [],
+  };
+  setKind(n.kind);
+  renderTags('flavours'); renderTags('dishes');
+  renderPhotos();
+}
+
+function setKind(kind) {
+  note.kind = kind;
+  document.querySelectorAll('[data-kind]').forEach((b) =>
+    b.setAttribute('aria-pressed', String(b.dataset.kind === kind)));
+  $('wineBlock').hidden = kind !== 'wine';
+  $('venueBlock').hidden = kind !== 'place';
+}
+document.querySelectorAll('[data-kind]').forEach((b) => {
+  b.onclick = () => { setKind(b.dataset.kind); saveDraft(); };
+});
+
+const str = (id) => $(id).value.trim();
+
+function collect() {
+  const now = new Date().toISOString();
+  const n = {
+    ...note,
+    at: withOffset($('at').value),
+    title: str('title'),
+    body: str('body'),
+    created_at: note.created_at || now,
+    updated_at: now,
+  };
+  if (n.kind === 'wine') {
+    n.wine = {
+      winery: str('winery'),
+      wine_type: str('wine_type') || null,
+      vintage: str('vintage'),
+      abv: str('abv'),
+      varieties: str('varieties'),
+      region: str('region'),
+      price_aud: str('price_aud'),
+      pairing: str('pairing'),
+      flavours: tags.flavours,
+    };
+    delete n.venue;   // wine 不带 venue 块(见 noteSchema 的 refine)
+    delete n.place;   // 酒不采集地点
+  } else {
+    n.venue = {
+      category: str('category') || null,
+      cuisine: str('cuisine'),
+      dishes: tags.dishes,
+    };
+    n.place = {
+      name: note.place?.name || '',
+      gmaps_url: str('gmaps'),
+      coords: note.place?.coords ?? null,
+    };
+    delete n.wine;    // place 不带 wine 块
+  }
+  return n;
+}
+
+// ——— 草稿:误关标签页/断网都不丢 ———
+// collect() 现在可能因为校验(比如时间没填、深度填了非数字)而抛错;这里的 try 把它接住,
+// 这一下敲键就不存草稿,但不能让抛错冒到 input 事件外面去打断打字
+const DRAFT = 'notes_draft';
+function saveDraft() {
+  try { localStorage.setItem(DRAFT, JSON.stringify(collect())); } catch {}
+}
+document.addEventListener('input', saveDraft);
+
+/**
+ * 存一次笔记。返回 true 表示成功。
+ * 做成可 await 的函数(而不是只挂在按钮上),是因为 addPhotos 传完照片要接着存,
+ * 存完还得把「跳过了几张」这类信息补回状态栏——直接 click() 的话那句话会被「已保存」冲掉。
+ * @param {string} [suffix] 追加在「已保存」后面的话
+ */
+async function saveNote(suffix = '') {
+  let n;
+  try {
+    n = collect();
+  } catch (e) {
+    say(e.message);
+    return false;
+  }
+  if (!n.title) { say('标题必填'); return false; }
+  say('保存中…');
+  try {
+    await api(`/api/notes/${encodeURIComponent(n.kind)}/${encodeURIComponent(n.id)}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(n),
+    });
+    localStorage.setItem('notes_last_kind', n.kind);
+    localStorage.removeItem(DRAFT);
+    note = n;
+    say(`已保存${suffix}`);
+    return true;
+  } catch (e) {
+    say(`保存失败,内容还留着:${e.message}`);
+    return false;
+  }
+}
+
+$('save').onclick = () => { saveNote(); };
+
+// ——— 地点:三条路都能填 coords,链接解析 / 当前定位 / 手填 ———
+function setPlace(place) {
+  note.place = place;
+  $('coords').value = place.coords ? place.coords.join(', ') : '';
+  $('placeInfo').textContent = place.coords ? (place.name || '已定位') : '';
+}
+
+$('gmaps').onchange = async () => {
+  const url = str('gmaps');
+  if (!url) return;
+  say('解析地点中…');
+  try {
+    const r = await api('/api/resolve-place', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    setPlace({ name: r.name || '', gmaps_url: url, coords: r.coords });
+    say(r.coords ? '' : '这个链接没带坐标,用「当前」按钮或手填一下');
+    saveDraft();
+  } catch (e) { say(`解析失败:${e.message},可以手填坐标`); }
+};
+
+$('here').onclick = () => {
+  say('定位中…');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const r6 = (n) => Math.round(n * 1e6) / 1e6;
+      setPlace({
+        name: note.place?.name || '',
+        gmaps_url: str('gmaps'),
+        coords: [r6(pos.coords.longitude), r6(pos.coords.latitude)],
+      });
+      say(''); saveDraft();
+    },
+    (err) => say(`定位失败:${err.message},可以手填坐标`),
+    { enableHighAccuracy: true, timeout: 10000 },
+  );
+};
+
+// 手填退路:潜点在海上,既贴不出链接也不能用当前定位
+$('coords').onchange = () => {
+  const v = str('coords');
+  if (!v) { setPlace({ ...note.place, coords: null }); saveDraft(); return; }
+  const [lng, lat] = v.split(/[,，]\s*/).map(Number);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat) || Math.abs(lng) > 180 || Math.abs(lat) > 90) {
+    say('坐标格式:经度, 纬度(经度在前)');
+    return;
+  }
+  setPlace({ ...note.place, coords: [lng, lat] });
+  say(''); saveDraft();
+};
+
+/** 长边 1600px、JPEG q0.78,与 scripts/import-photos.mjs 同规格;canvas 重编码即剥离 EXIF/GPS。
+    iOS 的文件选择器除了相册也能选到"文件"App 里的 PDF、或解不出来的 HEIC,createImageBitmap
+    这时会直接 reject——统一包成中文提示,不能让业主看到一段英文报错就以为卡死了 */
+async function compress(file) {
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error(`不是能识别的图片(${file.name || '未命名文件'})`);
+  }
+  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bmp.width * scale);
+  canvas.height = Math.round(bmp.height * scale);
+  canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close();
+  return new Promise((ok, no) =>
+    canvas.toBlob((b) => (b ? ok(b) : no(new Error('压缩失败'))), 'image/jpeg', 0.78));
+}
+
+async function addPhotos(files) {
+  let n;
+  try {
+    n = collect(); // 复用保存按钮的同一套校验:时间没填、深度填了非数字,这里就该拦下——
+                    // 不能让 collect() 抛出的异常裸奔到 onchange 外面变成一次没有任何提示的静默失败
+  } catch (e) {
+    say(e.message);
+    return;
+  }
+  if (!n.title) { say('先填标题,再加照片'); return; }
+  // 上传接口按笔记目录下已有张数编号,所以笔记得先落地一次
+  try {
+    await api(`/api/notes/${encodeURIComponent(n.kind)}/${encodeURIComponent(n.id)}`, {
+      method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(n),
+    });
+  } catch (e) {
+    say(`保存笔记失败,还没开始传照片:${e.message}`);
+    return;
+  }
+  note = n;
+
+  let ok = 0;
+  let skipped = 0;
+  let aborted = false; // 中途因上传/网络错误(比如 413)整批停下时,那句具体原因不能被下面的总结覆盖掉
+  for (let i = 0; i < files.length; i += 1) {   // 串行:一次选十几张大图并发压缩会把手机内存打爆,
+    const file = files[i];                       // 上传接口也要靠串行才能算对下一张的序号(见 worker.ts 注释)
+    say(`处理第 ${i + 1}/${files.length} 张…`);
+    let blob;
+    try {
+      blob = await compress(file);
+    } catch (e) {
+      skipped += 1;
+      say(`第 ${i + 1} 张跳过:${e.message}`);
+      continue; // 一张解不出来的图不该拖累其余照片——业主要的就是"选中的都能传上去",不能因一张坏图整批卡住
+    }
+    try {
+      const url = `/api/notes/${encodeURIComponent(note.kind)}/${encodeURIComponent(note.id)}/photos`
+        + `?at=${encodeURIComponent(note.at)}`;
+      const r = await api(url, { method: 'POST', body: blob });
+      note.photos.push({ file: r.file, note: '' });
+      ok += 1;
+      appendPhotoFigure(note.photos.length - 1);
+      saveDraft();
+    } catch (e) {
+      say(`第 ${i + 1} 张上传失败,已停止:${e.message}`); // 413(照片过大,手机端压缩可能失效了)就靠这句话让业主看到——
+      aborted = true;                                        // 是这一批里唯一"真出问题了"的错误,绝不能被盖掉
+      break; // 上传/网络错误大概率后面几张也会一样失败,不必对着接口连环报错刷屏
+    }
+  }
+  // 整批停在错误上时,那句具体原因就是最终状态,不能再存一次把它冲掉
+  if (aborted) return;
+  // 「跳过了几张」必须活到最后:漏掉一张照片而你没看见,就等于少了一段记忆
+  if (ok > 0) await saveNote(`,加了 ${ok} 张${skipped ? `,跳过 ${skipped} 张(不是能识别的图片)` : ''}`);
+  else say(`一张都没加成${skipped ? `,${skipped} 张不是能识别的图片` : ''}`);
+}
+
+function photoUrl(file) {
+  return `/api/photos/${encodeURIComponent(note.kind)}/${encodeURIComponent(note.id)}/${encodeURIComponent(file)}`;
+}
+
+// 缩略图带 token 取,只能走 fetch;缓存 objectURL,避免每次重渲染都重新拉一遍(省 R2 读取和手机流量)。
+// key 里带 note.id,换笔记不会串图;objectURL 在删照片时主动 revoke,切换笔记时靠 fillForm 里的
+// clearThumbCache 整体 revoke 一遍——不然反复打开好几条带照片的笔记,内存里的 blob URL 只增不减
+const thumbCache = new Map();
+function clearThumbCache() {
+  for (const url of thumbCache.values()) URL.revokeObjectURL(url);
+  thumbCache.clear();
+}
+async function thumbSrc(file) {
+  const key = `${note.id}/${file}`;
+  if (!thumbCache.has(key)) {
+    const res = await api(photoUrl(file));
+    thumbCache.set(key, URL.createObjectURL(await res.blob()));
+  }
+  return thumbCache.get(key);
+}
+
+async function delPhoto(idx) {
+  const p = note.photos[idx];
+  try {
+    await api(`/api/notes/${encodeURIComponent(note.kind)}/${encodeURIComponent(note.id)}`
+      + `/photos/${encodeURIComponent(p.file)}`, { method: 'DELETE' });
+    const key = `${note.id}/${p.file}`;
+    const cached = thumbCache.get(key);
+    if (cached) { URL.revokeObjectURL(cached); thumbCache.delete(key); } // 这张不会再显示了,立刻把内存还回去
+    note.photos.splice(idx, 1);
+    renderPhotos(); // 删除会让后面每张的下标整体前移,只有整体重建才能保证说明框/删除按钮绑的还是对的下标
+    await saveNote('(已删掉一张)');
+  } catch (e) { say(`删除失败:${e.message}`); }
+}
+
+/** 单张照片的 figure:缩略图 + 说明输入框 + 删除按钮。idx 是它在 note.photos 里的下标,
+    删除会让下标整体移位,所以调用方必须保证传入的 idx 对应当前数组状态(见 renderPhotos / appendPhotoFigure) */
+function photoFigure(idx) {
+  const p = note.photos[idx];
+  const fig = document.createElement('figure');
+  const img = document.createElement('img');
+  img.loading = 'lazy';
+  img.alt = p.note || p.file;
+  thumbSrc(p.file).then((src) => { img.src = src; })
+    .catch(() => { img.alt = '缩略图加载失败'; }); // 拉缩略图失败(比如网络抖动)时至少给个可读提示,别留一片空白也不报错
+  const cap = document.createElement('input');
+  cap.placeholder = '说点什么';
+  cap.value = p.note;
+  cap.oninput = () => { note.photos[idx].note = cap.value; saveDraft(); };
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'del';
+  del.textContent = '删除';
+  del.onclick = () => { if (confirm('删掉这张?')) delPhoto(idx); };
+  fig.append(img, cap, del);
+  return fig;
+}
+
+function addPhotoTile() {
+  const pick = document.createElement('label');
+  pick.className = 'add';
+  pick.textContent = '＋ 加照片';
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.hidden = true;
+  input.onchange = () => { if (input.files.length) addPhotos([...input.files]); input.value = ''; };
+  pick.append(input);
+  return pick;
+}
+
+function renderPhotos() {
+  const box = $('photoBlock');
+  box.innerHTML = '<label>照片</label>';
+  const grid = document.createElement('div');
+  grid.className = 'photos';
+  note.photos.forEach((_, idx) => grid.append(photoFigure(idx)));
+  grid.append(addPhotoTile());
+  box.append(grid);
+}
+
+/** 上传循环期间只在末尾插一张新 figure,不整体重渲染——不然每传完一张就把「加照片」的
+    file input 和其余每张已有的说明输入框全部重建一遍,业主正在别的说明框里打字会被打断、焦点也保不住 */
+function appendPhotoFigure(idx) {
+  const grid = $('photoBlock').querySelector('.photos');
+  if (!grid) { renderPhotos(); return; } // 保险:理论上 renderPhotos 已经跑过一次,这里应该总能找到 .photos
+  grid.insertBefore(photoFigure(idx), grid.querySelector('.add'));
+}
+
+// ——— 列表 / 编辑 切换 ———
+function showEditor() { $('list').hidden = true; $('editor').hidden = false; $('back').hidden = false; }
+function showList() { $('editor').hidden = true; $('list').hidden = false; $('back').hidden = true; }
+
+$('back').onclick = () => { openList(); };
+
+async function openList(kind) {
+  kind = kind || note?.kind || localStorage.getItem('notes_last_kind') || 'wine';
+  localStorage.setItem('notes_last_kind', kind);
+  showList();
+  $('head').textContent = kind === 'wine' ? '酒' : '店';
+  const box = $('list');
+  box.innerHTML = '';
+
+  // 顶部 kind 切换:决定看哪一类的列表
+  const seg = document.createElement('div');
+  seg.className = 'seg';
+  for (const [k, lbl] of [['wine', '🍷 酒'], ['place', '🍽️ 店']]) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = lbl;
+    b.setAttribute('aria-pressed', String(k === kind));
+    b.onclick = () => openList(k);
+    seg.append(b);
+  }
+  box.append(seg);
+
+  const msg = (t) => {
+    const p = document.createElement('p');
+    p.style.cssText = 'color:var(--muted);font-size:13px';
+    p.textContent = t;
+    box.append(p);
+  };
+  try {
+    const { notes } = await api(`/api/notes?kind=${encodeURIComponent(kind)}`);
+    if (!notes.length) msg(kind === 'wine' ? '还没有酒笔记' : '还没有店笔记');
+    notes.forEach((s) => {
+      const row = document.createElement('div');
+      row.className = 'item';
+      // 结构是写死的静态标签,数据一律 textContent 填,不用 innerHTML 拼业主输入
+      row.innerHTML = '<div class="ph"></div><div><b></b><span></span></div>';
+      row.querySelector('b').textContent = s.title;
+      row.querySelector('span').textContent =
+        `${s.at.slice(0, 16).replace('T', ' ')} · ${s.photo_count} 张`;
+      if (s.photo_count > 0) row.querySelector('.ph').textContent = String(s.photo_count);
+      row.onclick = () => openNote(kind, s.id);
+      box.append(row);
+    });
+  } catch (e) {
+    msg(`加载失败:${e.message}`);
+  }
+
+  const add = document.createElement('button');
+  add.className = 'btn';
+  add.type = 'button';
+  add.style.marginTop = '14px';
+  add.textContent = kind === 'wine' ? '＋ 新酒笔记' : '＋ 新店笔记';
+  add.onclick = () => {
+    const n = blankNote();
+    n.kind = kind;
+    localStorage.removeItem(DRAFT);
+    fillForm(n);
+    $('head').textContent = '新笔记';
+    showEditor();
+    say('');
+  };
+  box.append(add);
+}
+
+async function openNote(kind, id) {
+  say('');
+  try {
+    const n = await api(`/api/notes/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`);
+    localStorage.removeItem(DRAFT);
+    fillForm(n);
+    $('head').textContent = '编辑';
+    showEditor();
+  } catch (e) { say(`打不开:${e.message}`); }
+}
+
+$('delNote').onclick = async () => {
+  if (!confirm('连同照片一起删掉?')) return;
+  try {
+    await api(`/api/notes/${encodeURIComponent(note.kind)}/${encodeURIComponent(note.id)}`, { method: 'DELETE' });
+    localStorage.removeItem(DRAFT);
+    openList();
+  } catch (e) { say(`删除失败:${e.message}`); }
+};
+
+// 启动:有没存完的草稿就直接进编辑器接着写(哪怕是对已有笔记的半截编辑——
+// 这份保护本来就是为了防误关标签页/断网,不是为了区分"新笔记"还是"编辑中的旧笔记"),
+// 没有草稿则从列表开始,业主一打开先看到自己记过什么,不会因为看不到列表而重复记
+const draft = localStorage.getItem(DRAFT);
+if (draft) {
+  fillForm(JSON.parse(draft));
+  showEditor();
+  say('恢复了上次没存完的内容');
+} else {
+  fillForm(blankNote());
+  openList();
+}
+</script>

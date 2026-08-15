@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 独立 Worker / Node 脚本,不套 Next 的前端 lint 规则:
+    "notes-app/**",
+    "scripts/**",
   ]),
 ]);
 

@@ -1209,7 +1209,7 @@ Expected: 打印已部署到 `https://gourmet-notes.tianshu-tan.workers.dev`。
 
 - [ ] **Step 4: 手机加主屏**
 
-手机打开 `https://gourmet-notes.tianshu-tan.workers.dev/#t=<那串>`。**等地址栏里 `#t=` 消失(页面 JS 会 replaceState 抹掉)再「添加到主屏幕」**,否则图标会把带 token 的地址存成启动页。
+手机用 Safari 打开 `https://gourmet-notes.tianshu-tan.workers.dev/?t=<那串>`(⚠️ `?t=` **不是** `#t=`——2026-08-15 真机踩实:iOS 主屏 app 会吞掉 URL 里的 `#fragment`、且存储与 Safari 隔离,只有 `?t=` 能随图标存下),**直接「添加到主屏幕」**。token 随图标保存,独立 app 里没有地址栏、看不见。
 
 - [ ] **Step 5: 真机冒烟清单**(模拟不了,必须真机过一遍)
 

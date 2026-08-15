@@ -27,7 +27,7 @@ gourmet 现在只能在电脑上编辑 `wines.json` / `restaurants/*.md`。喝�
 | 采集形态 | **手机网页表单**(加主屏当 app),顶部 🍷酒 / 🍽️店 切换 |
 | 部署形态 | **独立 Cloudflare Worker**,和主站分开部署。主站 Next.js 构建 / GitHub Pages 部署一个字不改 |
 | 存储 | **Cloudflare R2 单桶 `gourmet-notes`**。业主已为 travel 绑卡并成功用过 R2,绑卡这道坎已过。一条笔记 = 一个 `note.json` |
-| 鉴权 | Worker 自校验一个 32 字节随机 token,手机与命令行共用。token 走 URL fragment(`#t=`) |
+| 鉴权 | Worker 自校验一个 32 字节随机 token,手机与命令行共用。手机 token 走 URL 查询参数(`?t=`,原因见 §6 的 iOS 说明) |
 | 数据流 | **单向**:手机 → R2 → `notes:pull` → 本地 `web/field-notes/`。拉下来后本地为唯一真相源,不回写手机 |
 | 笔记类型 | 两种:`wine`(酒)/ `place`(餐厅·咖啡·酒吧) |
 | 笔记粒度 | 一条笔记 = 一件事(一支酒 / 一家店),与最终 entry 一对一 |
@@ -41,7 +41,7 @@ gourmet 现在只能在电脑上编辑 `wines.json` / `restaurants/*.md`。喝�
 
 ```
 手机网页 gourmet-notes.tianshu-tan.workers.dev
-   │  token 校验(URL #t= 首次带入 → localStorage)
+   │  token 校验(URL ?t= 带入 → localStorage)
    ▼
 独立 Worker ──────► R2 单桶 gourmet-notes(note.json + 压缩后照片)
                          │
@@ -185,7 +185,7 @@ web/field-notes/place/
 - **鉴权闸口支配所有路由**:`/` → 非 `/api/` 404 → `checkToken` → 路由。新增路由一律加在闸口之后。
 - **`page.html` 客户端代码里绝不能出现任何第三方 API key**(`/` 无条件公开)。Google Maps 解析在服务端做且不需 key。
 
-**Token 传递:** 首次 `GET /#t=<token>`,页面 JS 存 localStorage 后 `history.replaceState` 抹掉地址栏;之后所有 `/api/*` 带 `X-Notes-Token` 头。用 fragment 而非 `?t=`:fragment 不上送服务器,token 不进请求日志与 Referer。**等地址栏 `#t=` 消失再「添加到主屏幕」**,否则图标会存下带 token 的启动地址。
+**Token 传递(2026-08-15 真机修正,原 `#t=` 方案在 iOS 主屏 app 上不工作):** 手机用 `GET /?t=<token>` 带入,页面 JS 读出后存 localStorage;之后所有 `/api/*` 带 `X-Notes-Token` 头。**必须用 query(`?t=`)而不是 fragment(`#t=`)**:iOS「添加到主屏」的独立 app 有自己独立的 localStorage(与 Safari 不互通),且**会吞掉 URL 里的 `#fragment`**——用 `#t=` 时 token 永远进不了主屏 app(表现:Safari 能用、主屏 app 一直 401),只有 `?t=` 能随图标存下、每次启动读到。page.html 两者都读(`?t=` 优先),`#t=` 仅留作桌面浏览器/本地开发兼容。**不再 `replaceState` 抹地址栏**(那会让图标存下无 token 的地址,正是当初的 bug)。代价:`?t=` 会出现在首个页面 GET 的查询串里,仅 Cloudflare 边缘短暂可见——不进网站内容、不进 Referer,对个人工具可接受;泄露时换 secret 重新部署即可。
 
 ## 7. `npm run notes:pull`
 
@@ -282,7 +282,7 @@ npm run notes:pull place    # 只拉店
 2. 生成 token:`openssl rand -hex 32`
 3. 设进 Worker:`npx wrangler secret put NOTES_TOKEN --config web/notes-app/wrangler.jsonc`,同串写进 `web/.env`(`NOTES_TOKEN=…`,并加 `NOTES_URL=https://gourmet-notes.tianshu-tan.workers.dev`)
 4. `npm run notes:deploy`
-5. 手机打开 `https://gourmet-notes.tianshu-tan.workers.dev/#t=<token>`,**等 `#t=` 从地址栏消失再加主屏**
+5. 手机用 Safari 打开 `https://gourmet-notes.tianshu-tan.workers.dev/?t=<token>`(⚠️ `?t=` 不是 `#t=`,原因见 §6),**直接「添加到主屏幕」**(不要等地址栏变干净);token 随图标存下、独立 app 里看不见。secret / `.env` / 手机链接三处务必同一串 token(别用两次 `openssl` 输出)。iOS 主屏 app 会把页面缓存住,需更新时用带 `&v=N` 的新链接绕开缓存。
 6. 真机冒烟(照片压缩 / 相册多选 / 定位 / 断网存草稿这些模拟不了,需业主在手机上过一遍)
 
 ## 14. 风险与已知代价

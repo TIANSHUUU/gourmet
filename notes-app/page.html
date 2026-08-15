@@ -137,16 +137,14 @@
 const $ = (id) => document.getElementById(id);
 const say = (t) => { $('status').textContent = t; };
 
-// token:由 #t= 带入。用 fragment 而不是 ?t=,fragment 永不上送服务器(不进日志/Referer)。
-// iOS「添加到主屏」后的独立 app 有自己独立的 localStorage(与 Safari 不互通),所以 token 必须
-// 留在 URL 里、随图标一起被保存,每次启动都从 hash 重新读一遍;只有已经是独立 app 时才把它从
-// 地址里抹掉(纯为好看——iOS 重新启动仍会用图标里带 #t= 的原始地址,读得到)。
+// token:首访由 #t= 带入。用 fragment 而不是 ?t=,因为 fragment 永远不上送服务器,
+// 既不进 Cloudflare 请求日志也不会出现在 Referer 里——token 从头到尾不离开这台手机。
 const hashToken = new URLSearchParams(location.hash.slice(1)).get('t');
-if (hashToken) localStorage.setItem('notes_token', hashToken);
-const TOKEN = hashToken || localStorage.getItem('notes_token') || '';
-const standalone = window.navigator.standalone === true
-  || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-if (hashToken && standalone) history.replaceState(null, '', location.pathname);
+if (hashToken) {
+  localStorage.setItem('notes_token', hashToken);
+  history.replaceState(null, '', location.pathname); // 顺手抹掉地址栏,免得被存成主屏图标的启动地址
+}
+const TOKEN = localStorage.getItem('notes_token') || '';
 if (!TOKEN) say('缺少 token,请用带 #t=... 的链接打开一次');
 
 async function api(path, opts = {}) {

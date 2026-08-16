@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 const nonEmpty = z.string().min(1);
 const coords = z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(90)]);
+const level = z.enum(['low', 'medium', 'high']).nullable().default(null); // 风味曲线一档
 
 export const placeSchema = z.object({
   name: z.string().default(''),
@@ -29,6 +30,26 @@ export const venueSchema = z.object({
   dishes: z.array(nonEmpty).default([]),
 });
 
+export const coffeeSchema = z.object({
+  roaster: z.string().default(''),
+  producer: z.string().default(''),
+  farm: z.string().default(''),
+  region: z.string().default(''),
+  altitude: z.string().default(''),
+  varietal: z.string().default(''),
+  process: z.string().default(''),
+  roast_level: z.string().default(''),   // 烘焙度,业主惯例字段,纯文本
+  brew: z.string().default(''),          // 冲煮方式(磨豆机/粉水比/水温)
+  roast_date: z.string().default(''),    // 烘焙日;首次冲煮日用顶层 at
+  product_url: z.string().default(''),
+  flavours: z.array(nonEmpty).default([]),
+  // 风味曲线:酸度/甜度/醇厚/香气/余韵,各 low|medium|high|null
+  profile: z
+    .object({ acidity: level, sweetness: level, body: level, aroma: level, finish: level })
+    .default({}),
+  summary: z.string().default(''),       // 一句话总评
+});
+
 export const photoSchema = z.object({
   file: nonEmpty,
   note: z.string().default(''),
@@ -37,7 +58,7 @@ export const photoSchema = z.object({
 export const noteSchema = z
   .object({
     id: nonEmpty,
-    kind: z.enum(['wine', 'place']),
+    kind: z.enum(['wine', 'place', 'coffee']),
     at: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'at 必须是带日期与时刻的 ISO 字符串')
@@ -47,17 +68,22 @@ export const noteSchema = z
     body: z.string().default(''),
     wine: wineSchema.optional(),
     venue: venueSchema.optional(),
+    coffee: coffeeSchema.optional(),
     photos: z.array(photoSchema).default([]),
     created_at: nonEmpty,
     updated_at: nonEmpty,
   })
   .refine((n) => n.kind === 'wine' || n.wine === undefined, {
-    message: 'kind 为 place 时不能带 wine 块',
+    message: '只有 kind=wine 才能带 wine 块',
     path: ['wine'],
   })
   .refine((n) => n.kind === 'place' || n.venue === undefined, {
-    message: 'kind 为 wine 时不能带 venue 块',
+    message: '只有 kind=place 才能带 venue 块',
     path: ['venue'],
+  })
+  .refine((n) => n.kind === 'coffee' || n.coffee === undefined, {
+    message: '只有 kind=coffee 才能带 coffee 块',
+    path: ['coffee'],
   });
 
 export function safeParseNote(raw) {

@@ -32,7 +32,7 @@ describe('笔记 schema', () => {
     expect(safeParseNote({ ...base, title: '' }).success).toBe(false);
   });
 
-  it('kind 只能是 wine 或 place', () => {
+  it('不认识的 kind(如 dive)被拒', () => {
     expect(safeParseNote({ ...base, kind: 'dive' }).success).toBe(false);
   });
 
@@ -84,6 +84,55 @@ describe('笔记 schema', () => {
 
   it('at 必须是有效日期时间,非法月日被拒', () => {
     expect(safeParseNote({ ...base, at: '2026-13-03T20:30:00+10:00' }).success).toBe(false);
+  });
+});
+
+describe('咖啡 schema', () => {
+  const cbase = { ...base, kind: 'coffee' };
+
+  it('kind 现在接受 coffee', () => {
+    expect(safeParseNote(cbase).success).toBe(true);
+  });
+
+  it('接受带 coffee 块的笔记,profile 各维默认 null、flavours 默认空', () => {
+    const r = safeParseNote({ ...cbase, coffee: { roaster: 'Brewman Tokyo' } });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.coffee?.flavours).toEqual([]);
+      expect(r.data.coffee?.profile).toEqual({
+        acidity: null, sweetness: null, body: null, aroma: null, finish: null,
+      });
+    }
+  });
+
+  it('风味曲线档位可填 low/medium/high,产地字段可带', () => {
+    const r = safeParseNote({
+      ...cbase,
+      coffee: { varietal: 'Geisha', process: 'Washed', profile: { acidity: 'high', body: 'low' } },
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.coffee?.profile.acidity).toBe('high');
+      expect(r.data.coffee?.profile.body).toBe('low');
+      expect(r.data.coffee?.profile.sweetness).toBeNull();
+    }
+  });
+
+  it('风味曲线档位只能是 low/medium/high', () => {
+    expect(safeParseNote({ ...cbase, coffee: { profile: { acidity: 'extreme' } } }).success).toBe(false);
+  });
+
+  it('kind=coffee 时不允许带 wine 或 venue 块', () => {
+    expect(safeParseNote({ ...cbase, wine: { winery: 'x' } }).success).toBe(false);
+    expect(safeParseNote({ ...cbase, venue: { cuisine: 'x' } }).success).toBe(false);
+  });
+
+  it('kind=wine 时不允许带 coffee 块', () => {
+    expect(safeParseNote({ ...base, coffee: { roaster: 'x' } }).success).toBe(false);
+  });
+
+  it('咖啡也能用 place 块记产区地图', () => {
+    expect(safeParseNote({ ...cbase, place: { name: 'Utcubamba', coords: [-78.38, -5.86] } }).success).toBe(true);
   });
 });
 

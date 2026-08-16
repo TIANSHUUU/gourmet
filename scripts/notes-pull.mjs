@@ -60,10 +60,10 @@ function noteToYaml(note) {
   return doc.toString({ lineWidth: 0, flowCollectionPadding: false });
 }
 
-const KINDS = ['wine', 'place'];
+const KINDS = ['wine', 'place', 'coffee'];
 const kindArg = process.argv[2];
 if (kindArg && !KINDS.includes(kindArg)) {
-  console.error('用法:npm run notes:pull [wine|place](省略则两种都拉)');
+  console.error('用法:npm run notes:pull [wine|place|coffee](省略则全拉)');
   process.exit(1);
 }
 const kinds = kindArg ? [kindArg] : KINDS;

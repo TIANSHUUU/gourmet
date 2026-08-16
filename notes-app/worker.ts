@@ -16,7 +16,7 @@ export const json = (data: unknown, status = 200) =>
     },
   });
 
-const KINDS = ['wine', 'place'];
+const KINDS = ['wine', 'place', 'coffee'];
 
 const noteKey = (kind: string, id: string) => `${kind}/${id}/note.json`;
 const notePrefix = (kind: string, id: string) => `${kind}/${id}/`;

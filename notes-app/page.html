@@ -22,6 +22,9 @@
   .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
   .grid4 label { margin:0 0 2px; text-align:center; }
   .grid4 input { text-align:center; padding:8px 4px; }
+  .grid5 { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+  .grid5 label { margin:0 0 2px; text-align:center; }
+  .grid5 select { text-align:center; padding:8px 2px; }
   .seg { display:flex; gap:6px; margin-bottom:6px; }
   .seg button { flex:0 0 auto; padding:6px 12px; font-size:13px; border:1px solid var(--line);
     background:var(--card); color:var(--muted); border-radius:8px; }
@@ -66,13 +69,14 @@
     <div class="seg">
       <button type="button" data-kind="wine" aria-pressed="true">🍷 酒</button>
       <button type="button" data-kind="place" aria-pressed="false">🍽️ 店</button>
+      <button type="button" data-kind="coffee" aria-pressed="false">☕ 咖啡</button>
     </div>
 
     <label for="at">时间</label>
     <input id="at" type="datetime-local" />
 
     <label for="title">标题 *</label>
-    <input id="title" placeholder="酒名 / 店名" />
+    <input id="title" placeholder="酒名 / 店名 / 豆名" />
 
     <label for="body">正文</label>
     <textarea id="body" placeholder="想到什么写什么"></textarea>
@@ -104,6 +108,51 @@
       <input id="pairing" placeholder="配了什么吃的" />
     </div>
 
+    <div id="coffeeBlock">
+      <label>风味关键词</label>
+      <div class="tags" id="coffeeFlavours"></div>
+
+      <label for="roaster">烘焙商</label>
+      <input id="roaster" placeholder="Brewman Tokyo" />
+
+      <div class="grid4" style="margin-top:14px">
+        <div style="grid-column:span 2"><label for="varietal">品种</label><input id="varietal" placeholder="Geisha" /></div>
+        <div style="grid-column:span 2"><label for="process">处理法</label><input id="process" placeholder="Washed" /></div>
+      </div>
+
+      <label for="c_region">产区</label>
+      <input id="c_region" placeholder="Utcubamba, Amazonas, Peru" />
+
+      <div class="grid4" style="margin-top:14px">
+        <div style="grid-column:span 2"><label for="altitude">海拔</label><input id="altitude" placeholder="1920 MASL" /></div>
+        <div style="grid-column:span 2"><label for="roast_level">烘焙度</label><input id="roast_level" placeholder="手冲 / 中浅" /></div>
+      </div>
+
+      <label for="producer">生产者</label>
+      <input id="producer" placeholder="Manuel Rojas…" />
+      <label for="farm">农场</label>
+      <input id="farm" placeholder="Mira Flores" />
+      <label for="roast_date">烘焙日期</label>
+      <input id="roast_date" type="date" />
+
+      <label for="brew">冲煮方式</label>
+      <input id="brew" placeholder="C40 18格, 1:15, 96℃" />
+
+      <label>风味曲线</label>
+      <div class="grid5">
+        <div><label for="p_acidity">酸</label><select id="p_acidity"><option value="">-</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></div>
+        <div><label for="p_sweetness">甜</label><select id="p_sweetness"><option value="">-</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></div>
+        <div><label for="p_body">醇</label><select id="p_body"><option value="">-</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></div>
+        <div><label for="p_aroma">香</label><select id="p_aroma"><option value="">-</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></div>
+        <div><label for="p_finish">韵</label><select id="p_finish"><option value="">-</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></div>
+      </div>
+
+      <label for="c_summary">一句话总评</label>
+      <input id="c_summary" placeholder="一句话形容它" />
+      <label for="product_url">产品链接</label>
+      <input id="product_url" placeholder="购买 / 产品页" />
+    </div>
+
     <div id="venueBlock">
       <label>招牌菜 / 关键词</label>
       <div class="tags" id="dishes"></div>
@@ -116,8 +165,10 @@
 
       <label for="cuisine">菜系</label>
       <input id="cuisine" placeholder="尼日利亚菜" />
+    </div>
 
-      <label for="gmaps">地点(Google Maps 链接)</label>
+    <div id="placeBlock">
+      <label for="gmaps">地点 / 产区(Google Maps 链接)</label>
       <div class="row">
         <input id="gmaps" style="flex:1;min-width:0" placeholder="贴 Google Maps 链接" />
         <button class="btn" id="here" type="button">当前</button>
@@ -195,7 +246,20 @@ const toLocalInput = (d) =>
   new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
 let note = null;
-let tags = { flavours: [], dishes: [] };
+let tags = { flavours: [], dishes: [], coffeeFlavours: [] };
+
+// 咖啡字段映射:[输入框 id, coffee 块里的 key]。fillForm 回填、collect 收集共用同一份
+const COFFEE_FIELDS = [
+  ['roaster', 'roaster'], ['producer', 'producer'], ['farm', 'farm'], ['c_region', 'region'],
+  ['altitude', 'altitude'], ['varietal', 'varietal'], ['process', 'process'],
+  ['roast_level', 'roast_level'], ['brew', 'brew'], ['roast_date', 'roast_date'],
+  ['c_summary', 'summary'], ['product_url', 'product_url'],
+];
+const COFFEE_PROFILE = [
+  ['p_acidity', 'acidity'], ['p_sweetness', 'sweetness'], ['p_body', 'body'],
+  ['p_aroma', 'aroma'], ['p_finish', 'finish'],
+];
+const KIND_LABEL = { wine: '酒', place: '店', coffee: '咖啡' };
 
 function blankNote() {
   return {
@@ -207,6 +271,7 @@ function blankNote() {
     body: '',
     wine: {},
     venue: {},
+    coffee: {},
     photos: [],
   };
 }
@@ -236,7 +301,7 @@ function renderTags(key) {
   add.className = 'tag';
   add.style.borderStyle = 'dashed';
   add.textContent = '＋ 加';
-  add.onclick = () => addTag(key, prompt(key === 'flavours' ? '风味关键词?' : '招牌菜 / 关键词?'));
+  add.onclick = () => addTag(key, prompt(key === 'dishes' ? '招牌菜 / 关键词?' : '风味关键词?'));
   el.append(add);
 }
 
@@ -254,12 +319,15 @@ function fillForm(n) {
   $('wine_type').value = n.wine?.wine_type ?? '';
   $('cuisine').value = n.venue?.cuisine ?? '';
   $('category').value = n.venue?.category ?? '';
+  for (const [id, key] of COFFEE_FIELDS) $(id).value = n.coffee?.[key] ?? '';
+  for (const [id, key] of COFFEE_PROFILE) $(id).value = n.coffee?.profile?.[key] ?? '';
   tags = {
     flavours: n.wine?.flavours ? [...n.wine.flavours] : [],
     dishes: n.venue?.dishes ? [...n.venue.dishes] : [],
+    coffeeFlavours: n.coffee?.flavours ? [...n.coffee.flavours] : [],
   };
   setKind(n.kind);
-  renderTags('flavours'); renderTags('dishes');
+  renderTags('flavours'); renderTags('dishes'); renderTags('coffeeFlavours');
   renderPhotos();
 }
 
@@ -268,7 +336,9 @@ function setKind(kind) {
   document.querySelectorAll('[data-kind]').forEach((b) =>
     b.setAttribute('aria-pressed', String(b.dataset.kind === kind)));
   $('wineBlock').hidden = kind !== 'wine';
+  $('coffeeBlock').hidden = kind !== 'coffee';
   $('venueBlock').hidden = kind !== 'place';
+  $('placeBlock').hidden = !(kind === 'place' || kind === 'coffee'); // 地点/产区块:店和咖啡共用
 }
 document.querySelectorAll('[data-kind]').forEach((b) => {
   b.onclick = () => { setKind(b.dataset.kind); saveDraft(); };
@@ -286,6 +356,8 @@ function collect() {
     created_at: note.created_at || now,
     updated_at: now,
   };
+  // 地点/产区块:店和咖啡都用
+  const place = () => ({ name: note.place?.name || '', gmaps_url: str('gmaps'), coords: note.place?.coords ?? null });
   if (n.kind === 'wine') {
     n.wine = {
       winery: str('winery'),
@@ -298,20 +370,23 @@ function collect() {
       pairing: str('pairing'),
       flavours: tags.flavours,
     };
-    delete n.venue;   // wine 不带 venue 块(见 noteSchema 的 refine)
-    delete n.place;   // 酒不采集地点
+    delete n.venue; delete n.coffee; delete n.place; // 酒不带 venue/coffee 块,也不采集地点
+  } else if (n.kind === 'coffee') {
+    const profile = {};
+    for (const [id, key] of COFFEE_PROFILE) profile[key] = str(id) || null;
+    const coffee = { flavours: tags.coffeeFlavours, profile };
+    for (const [id, key] of COFFEE_FIELDS) coffee[key] = str(id);
+    n.coffee = coffee;
+    n.place = place();
+    delete n.wine; delete n.venue;
   } else {
     n.venue = {
       category: str('category') || null,
       cuisine: str('cuisine'),
       dishes: tags.dishes,
     };
-    n.place = {
-      name: note.place?.name || '',
-      gmaps_url: str('gmaps'),
-      coords: note.place?.coords ?? null,
-    };
-    delete n.wine;    // place 不带 wine 块
+    n.place = place();
+    delete n.wine; delete n.coffee;
   }
   return n;
 }
@@ -588,14 +663,14 @@ async function openList(kind) {
   kind = kind || note?.kind || localStorage.getItem('notes_last_kind') || 'wine';
   localStorage.setItem('notes_last_kind', kind);
   showList();
-  $('head').textContent = kind === 'wine' ? '酒' : '店';
+  $('head').textContent = KIND_LABEL[kind];
   const box = $('list');
   box.innerHTML = '';
 
   // 顶部 kind 切换:决定看哪一类的列表
   const seg = document.createElement('div');
   seg.className = 'seg';
-  for (const [k, lbl] of [['wine', '🍷 酒'], ['place', '🍽️ 店']]) {
+  for (const [k, lbl] of [['wine', '🍷 酒'], ['place', '🍽️ 店'], ['coffee', '☕ 咖啡']]) {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = lbl;
@@ -613,7 +688,7 @@ async function openList(kind) {
   };
   try {
     const { notes } = await api(`/api/notes?kind=${encodeURIComponent(kind)}`);
-    if (!notes.length) msg(kind === 'wine' ? '还没有酒笔记' : '还没有店笔记');
+    if (!notes.length) msg(`还没有${KIND_LABEL[kind]}笔记`);
     notes.forEach((s) => {
       const row = document.createElement('div');
       row.className = 'item';
@@ -634,7 +709,7 @@ async function openList(kind) {
   add.className = 'btn';
   add.type = 'button';
   add.style.marginTop = '14px';
-  add.textContent = kind === 'wine' ? '＋ 新酒笔记' : '＋ 新店笔记';
+  add.textContent = `＋ 新${KIND_LABEL[kind]}笔记`;
   add.onclick = () => {
     const n = blankNote();
     n.kind = kind;

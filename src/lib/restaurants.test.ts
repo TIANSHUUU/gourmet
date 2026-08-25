@@ -16,4 +16,12 @@ describe('sortRestaurants', () => {
     ]).map(r => r.slug)
     expect(out).toEqual(['b', 'c', 'a'])
   })
+
+  it('a day-precise visited sorts ahead of a month-only one in the same month', () => {
+    const out = sortRestaurants([
+      make('dons', '2026-08'),
+      make('zareh', '2026-08-26'),
+    ]).map(r => r.slug)
+    expect(out).toEqual(['zareh', 'dons'])
+  })
 })

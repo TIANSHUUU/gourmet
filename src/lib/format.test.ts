@@ -9,6 +9,10 @@ describe('formatVisited', () => {
   it('formats Chinese', () => {
     expect(formatVisited('2026-06', 'zh')).toBe('造访于 2026 年 6 月')
   })
+  it('ignores an optional day, still showing the month', () => {
+    expect(formatVisited('2026-08-26', 'en')).toBe('Visited August 2026')
+    expect(formatVisited('2026-08-26', 'zh')).toBe('造访于 2026 年 8 月')
+  })
   it('returns empty string for missing or malformed input', () => {
     expect(formatVisited('', 'en')).toBe('')
     expect(formatVisited('2026', 'en')).toBe('')

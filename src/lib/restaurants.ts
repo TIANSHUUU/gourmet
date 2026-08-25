@@ -14,7 +14,7 @@ export type Restaurant = {
   cuisine_zh: string
   map_url: string
   map_type: 'google' | 'amap'
-  visited: string // YYYY-MM
+  visited: string // YYYY-MM (optional -DD to break same-month ties, newest first)
   tagline_en?: string
   tagline_zh?: string
   images: string[]

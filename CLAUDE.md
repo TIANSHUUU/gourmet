@@ -18,7 +18,9 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 2. Create `web/src/data/restaurants/<slug>.md`:
    ```yaml
    ---
-   slug, name, suburb, city, category, cuisine_en, cuisine_zh, map_url, map_type (google|amap), images: [...]
+   slug, name, suburb, city, category, cuisine_en, cuisine_zh, map_url, map_type (google|amap),
+   coords: [lng, lat]  (required — run `npm run coords:backfill` to fill it from map_url, or `npm run coords:check` to verify),
+   images: [...]
    ---
    ## en
    (review)
@@ -28,6 +30,8 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 3. Translate the review EN↔ZH — tone should be **concise, light-hearted, fun-loving** (per user preference, not formal Michelin-speak)
 4. `npm run build` to verify both the homepage grid and `/<slug>` detail page generate
 5. Commit + push (auto-deploys)
+6. Non-food places (sights / activities / shops / stays) go to `web/src/data/spots/<slug>.md` with the **same frontmatter**; `category` there must be one of `sight | activity | shop | stay` (restaurants/ only allows `food | cafe | bar`). They are read by `src/lib/places.ts` (`getAllPlaces()`, zod-validated, build fails on a missing/invalid `coords`) and will show on the `/map` page; the homepage grid stays food-only for now.
+7. `src/data/map/cities.json` decides which city a place belongs to **by bounds**, not by its `city` string. A place outside every city makes `src/lib/map/cities.test.ts` fail — add a city entry (slug, names, bounds, default view) when that happens.
 
 ## Status
 - Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne)

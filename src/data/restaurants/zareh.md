@@ -7,6 +7,7 @@ category: food
 cuisine_en: "Middle Eastern"
 cuisine_zh: "中东菜"
 map_url: "https://www.google.com/maps/place/Zareh/@-37.797961,144.9821171,17z/data=!3m1!4b1!4m6!3m5!1s0x6ad6430013769889:0xb9f7e97f8baa3b6b!8m2!3d-37.797961!4d144.984692!16s%2Fg%2F11ybgzc4vq"
+coords: [144.984692, -37.797961]
 map_type: google
 visited: "2026-08-26"
 tagline_en: "Open-flame BBQ, bold flavours, and the chef's own records spinning all night."

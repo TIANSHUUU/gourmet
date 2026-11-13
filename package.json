@@ -10,7 +10,9 @@
     "test": "vitest run",
     "notes:dev": "wrangler dev --config notes-app/wrangler.jsonc",
     "notes:deploy": "wrangler deploy --config notes-app/wrangler.jsonc",
-    "notes:pull": "node scripts/notes-pull.mjs"
+    "notes:pull": "node scripts/notes-pull.mjs",
+    "coords:backfill": "node scripts/backfill-coords.mjs",
+    "coords:check": "node scripts/backfill-coords.mjs --check"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

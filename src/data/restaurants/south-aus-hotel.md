@@ -7,6 +7,7 @@ category: bar
 cuisine_en: "Wine Bar"
 cuisine_zh: "葡萄酒吧"
 map_url: "https://www.google.com/maps/place/South+Australian+Hotel/@-37.8296472,140.781207,17z/data=!3m1!4b1!4m6!3m5!1s0xaa9e261d38a01ce9:0xed22f96555311351!8m2!3d-37.8296515!4d140.7837819!16s%2Fg%2F11bxdrtp5c?entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D"
+coords: [140.783782, -37.829651]
 map_type: google
 visited: "2026-03"
 tagline_en: "A small-town gem worth the detour — proper wine, zero pretension."

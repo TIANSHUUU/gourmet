@@ -7,6 +7,7 @@ category: bar
 cuisine_en: "Wine Bar"
 cuisine_zh: "葡萄酒吧"
 map_url: "https://www.google.com/maps/place/Don's/@-37.8469736,144.9902914,17z/data=!4m16!1m9!3m8!1s0x6ad66962fc01b20d:0xc9147593ede1ee08!2sDon's!8m2!3d-37.8469779!4d144.9928663!9m1!1b1!16s%2Fg%2F11q4m6n581!3m5!1s0x6ad66962fc01b20d:0xc9147593ede1ee08!8m2!3d-37.8469779!4d144.9928663!16s%2Fg%2F11q4m6n581?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D"
+coords: [144.992866, -37.846978]
 map_type: google
 visited: "2026-08"
 tagline_en: "Great wines, warm welcome, right next to Prahran Market."

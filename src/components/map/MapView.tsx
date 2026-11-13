@@ -7,6 +7,7 @@ import {
   setWorkerUrl,
   type GeoJSONSource,
   type MapLayerMouseEvent,
+  type PaddingOptions,
   type StyleSpecification,
 } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -28,9 +29,15 @@ export const LAYER_CLUSTER_COUNT = 'place-cluster-count'
 export const LAYER_LABEL = 'place-label'
 export const LAYER_BADGE = 'place-badge'
 
-// MapLibre 的 padding 是持久的:每次镜头操作都显式给,卡片关闭时复位
+// MapLibre 的 padding 是持久的:每次镜头操作都显式给,卡片关闭时复位。
+// 注意 fitBounds 默认把 padding 叠加在地图"当前 padding"上且不持久化,所以 fitBounds 都要带 absolutePadding: true
+// (maplibre 7 起成为默认);flyTo / easeTo / jumpTo 传的 padding 本来就是替换并持久。
 const OVERVIEW_PADDING = { top: 150, bottom: 60, left: 60, right: 60 }
 const CITY_PADDING = { top: 150, bottom: 80, left: 40, right: 40 }
+// 手机:右下角有 ~150px 高的虚拟方向键,底部要多留,否则最南的店会被它盖住
+const CITY_PADDING_MOBILE = { top: 150, bottom: 200, left: 40, right: 40 }
+const isMobileViewport = () => window.matchMedia('(max-width: 767px)').matches
+const cityPadding = () => (isMobileViewport() ? CITY_PADDING_MOBILE : CITY_PADDING)
 const CARD_PADDING_MOBILE = { top: 0, bottom: 260, left: 0, right: 0 }
 const CARD_PADDING_DESKTOP = { top: 0, bottom: 0, left: 0, right: 380 }
 /** 单店城市:小人出生在店南边约 90 m,免得一按键就"到达" */
@@ -82,6 +89,9 @@ export default function MapView(props: Props) {
   })
   const lastFocusRef = useRef<string | null>(null)
   const lastNearRef = useRef<string | null>(null)
+  // 地图此刻"应有"的 padding(总览 / 城市 / 卡片)。凡是自己不换 padding 的镜头操作(聚合圈点击、🍍、3D、小人起步拉近)
+  // 都要带上它:MapLibre 里任何不带 padding 的镜头调用,会把进行中的 padding 过渡打断在半截并留在那里
+  const padRef = useRef<PaddingOptions>(OVERVIEW_PADDING)
 
   // 1) 建图(只跑一次;StrictMode 下会跑两遍,靠 cancelled 守住)。reducedMotion 只在建图时读一次。
   useEffect(() => {
@@ -194,7 +204,7 @@ export default function MapView(props: Props) {
             if (!f) return
             const src = m.getSource(SOURCE_ID) as GeoJSONSource
             const zoom = await src.getClusterExpansionZoom(Number(f.properties.cluster_id))
-            m.easeTo({ center: (f.geometry as Point).coordinates as LngLat, zoom })
+            m.easeTo({ center: (f.geometry as Point).coordinates as LngLat, zoom, padding: padRef.current })
           })
           m.on('click', e => {
             const hits = m.queryRenderedFeatures(e.point, { layers: [LAYER_LABEL, LAYER_BADGE, LAYER_CLUSTER] })
@@ -214,15 +224,15 @@ export default function MapView(props: Props) {
               lastNearRef.current = slug
               if (slug) m.setFeatureState({ source: SOURCE_ID, id: slug }, { near: true })
             },
-          })
+          }, () => padRef.current)
           walkerRef.current = walker
           apiRef.current = {
             setInput: dir => walker.setInput(dir),
             recenter: () => {
               if (!walker.isVisible()) return
-              m.easeTo({ center: walker.position(), zoom: Math.max(m.getZoom(), 15), duration: reducedMotion ? 0 : 500 })
+              m.easeTo({ center: walker.position(), zoom: Math.max(m.getZoom(), 15), padding: padRef.current, duration: reducedMotion ? 0 : 500 })
             },
-            togglePitch: () => m.easeTo({ pitch: m.getPitch() > 20 ? 0 : 55, duration: reducedMotion ? 0 : 500 }),
+            togglePitch: () => m.easeTo({ pitch: m.getPitch() > 20 ? 0 : 55, padding: padRef.current, duration: reducedMotion ? 0 : 500 }),
           }
           setReady(true)
         })
@@ -249,19 +259,21 @@ export default function MapView(props: Props) {
     if (!m || !walker || !ready) return
     const city = cities.find(c => c.slug === activeCity)
     if (!city) {
+      padRef.current = OVERVIEW_PADDING
       walker.hide()
       const b = boundsOf(data.features.map(f => f.geometry.coordinates as LngLat))
-      if (b) m.fitBounds(b, { padding: OVERVIEW_PADDING, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
+      if (b) m.fitBounds(b, { padding: OVERVIEW_PADDING, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
       return
     }
     const inCity = data.features
       .map(f => f.geometry.coordinates as LngLat)
       .filter(c => inBounds(c, city.bounds))
-    const cam = { pitch: city.view.pitch, bearing: city.view.bearing, padding: CITY_PADDING }
+    padRef.current = cityPadding()
+    const cam = { pitch: city.view.pitch, bearing: city.view.bearing, padding: padRef.current }
     let spawn: LngLat
     if (inCity.length >= 2) {
       const b = boundsOf(inCity) as [LngLat, LngLat]
-      m.fitBounds(b, { ...cam, maxZoom: city.view.zoom, duration: reducedMotion ? 0 : 1800 })
+      m.fitBounds(b, { ...cam, absolutePadding: true, maxZoom: city.view.zoom, duration: reducedMotion ? 0 : 1800 })
       spawn = [(b[0][0] + b[1][0]) / 2, (b[0][1] + b[1][1]) / 2]
     } else if (inCity.length === 1) {
       const opts = { ...cam, center: inCity[0], zoom: city.view.zoom }
@@ -281,18 +293,22 @@ export default function MapView(props: Props) {
     const m = mapRef.current
     const walker = walkerRef.current
     if (!m || !walker || !ready) return
+    const hadFocus = lastFocusRef.current !== null
     if (lastFocusRef.current) m.setFeatureState({ source: SOURCE_ID, id: lastFocusRef.current }, { active: false })
     lastFocusRef.current = focusPlace?.properties.slug ?? null
     if (!focusPlace) {
-      m.easeTo({ padding: activeCity ? CITY_PADDING : OVERVIEW_PADDING, duration: reducedMotion ? 0 : 300 })
+      padRef.current = activeCity ? cityPadding() : OVERVIEW_PADDING
+      // 只有"刚关掉卡片"才需要把 padding 缓动回去。首次加载 / 卡片开着切城市时,上面的城市 effect 已经起了
+      // 带 padding 的 fitBounds / flyTo,这里再 easeTo 会把它打断(MapLibre 任何镜头调用都会 stop 掉进行中的动画)
+      if (hadFocus && !m.isMoving()) m.easeTo({ padding: padRef.current, duration: reducedMotion ? 0 : 300 })
       return
     }
     m.setFeatureState({ source: SOURCE_ID, id: focusPlace.properties.slug }, { active: true })
     const center = focusPlace.geometry.coordinates as LngLat
     // 不是走着到的(URL 直达 / 减少动态 / 搜索)就瞬移过去;走着到的别打断庆祝动画
     if (!walker.isVisible() || haversineMeters(walker.position(), center) > 5) walker.placeAt(center)
-    const mobile = window.matchMedia('(max-width: 767px)').matches
-    const opts = { center, zoom: 16, pitch: 55, padding: mobile ? CARD_PADDING_MOBILE : CARD_PADDING_DESKTOP }
+    padRef.current = isMobileViewport() ? CARD_PADDING_MOBILE : CARD_PADDING_DESKTOP
+    const opts = { center, zoom: 16, pitch: 55, padding: padRef.current }
     if (reducedMotion) m.jumpTo(opts)
     else m.flyTo({ ...opts, duration: 1500 })
     // eslint-disable-next-line react-hooks/exhaustive-deps

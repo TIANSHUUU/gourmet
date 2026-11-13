@@ -10,7 +10,7 @@ export default function MapControls({ onRecenter, onTogglePitch }: { onRecenter:
   const btn = 'w-11 h-11 rounded-full bg-[#1E242C]/85 text-[#F8F2DD] shadow-lg grid place-items-center hover:bg-[#F0742A] transition-colors font-label text-xs font-bold'
   return (
     <div className="flex flex-col gap-2">
-      <button type="button" className={btn} aria-label={ui.recenter} title={ui.recenter} onClick={onRecenter}>🍍</button>
+      <button type="button" className={btn} aria-label={ui.recenter} title={ui.recenter} onClick={onRecenter}><span className="text-xl leading-none">🍍</span></button>
       <button type="button" className={btn} aria-label={ui.togglePitch} title={ui.togglePitch} onClick={onTogglePitch}>3D</button>
     </div>
   )

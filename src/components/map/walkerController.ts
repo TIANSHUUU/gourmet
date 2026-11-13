@@ -1,4 +1,4 @@
-import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { Map as MapLibreMap, PaddingOptions } from 'maplibre-gl'
 import type { LngLat } from '@/lib/places'
 import { buildPath, haversineMeters, pathPosition } from '@/lib/map/geo'
 import {
@@ -37,14 +37,14 @@ export class WalkerController {
   private visible = false
   private celebratingUntil = 0
   private celebrateTimer = 0
-  /** 自由操控起步时的拉近动画结束时刻;期间不做镜头锁定,免得打断它 */
-  private zoomingUntil = 0
 
   constructor(
     private readonly map: MapLibreMap,
     spriteUrl: string,
     private readonly reducedMotion: boolean,
     private readonly events: WalkerEvents,
+    /** 地图此刻"应有"的 padding(卡片开着 / 城市 / 总览)。MapLibre 的 padding 是持久的,控制器的镜头调用都要带上它 */
+    private readonly getPadding: () => PaddingOptions,
   ) {
     this.marker = new WalkerMarker(spriteUrl)
     const c = map.getCenter()
@@ -115,9 +115,10 @@ export class WalkerController {
     this.auto = null
     if (wasZero && this.map.getZoom() < FREE_WALK_MIN_ZOOM) {
       // 城市级缩放下 30 m 半径根本点不中:先拉近到街道级再走
-      const duration = this.reducedMotion ? 0 : 600
-      this.zoomingUntil = performance.now() + duration
-      this.map.easeTo({ center: this.position(), zoom: FREE_WALK_MIN_ZOOM + 0.5, pitch: 55, duration })
+      this.map.easeTo({
+        center: this.position(), zoom: FREE_WALK_MIN_ZOOM + 0.5, pitch: 55, padding: this.getPadding(),
+        duration: this.reducedMotion ? 0 : 600,
+      })
     }
     this.marker.setAction('walk')
     this.startLoop()
@@ -155,7 +156,7 @@ export class WalkerController {
     const { pos, facing } = pathPosition(a.path, t)
     this.marker.setLngLat(pos)
     this.setFacing(facing)
-    this.map.easeTo({ center: pos, duration: 0 })
+    this.lockCamera(pos)
     if (t >= 1) {
       this.auto = null
       this.celebrate()
@@ -171,8 +172,8 @@ export class WalkerController {
     this.marker.setLngLat(pos)
     this.setFacing(facingFromDx(this.input.x, this.facing))
     if (now > this.celebratingUntil) this.marker.setAction('walk')
-    // 镜头锁定小人(规格里的"35% 软跟随"简化为锁定);拉近动画期间先不抢镜头
-    if (now > this.zoomingUntil) this.map.easeTo({ center: pos, duration: 0 })
+    // 镜头锁定小人(规格里的"35% 软跟随"简化为锁定)
+    this.lockCamera(pos)
 
     const r = proximityStep(this.near, pos, this.places, now)
     const nearChanged = r.state.near !== this.near.near
@@ -183,6 +184,15 @@ export class WalkerController {
       this.celebrate()
       this.events.onArrive(r.arrive)
     }
+  }
+
+  /**
+   * 镜头锁在小人身上。MapLibre 的任何镜头调用(包括 duration: 0)都会 stop() 掉进行中的动画,
+   * 所以别人的动画在跑(起步拉近 / 卡片 flyTo / 关卡片时的 padding 缓动 / 用户拖拽)时先让路,
+   * 否则 padding 会停在半截、flyTo 会被每帧打断。让路期间小人照走,动画一结束下一帧就锁回来。
+   */
+  private lockCamera(center: LngLat): void {
+    if (!this.map.isMoving()) this.map.easeTo({ center, padding: this.getPadding(), duration: 0 })
   }
 
   private celebrate(): void {

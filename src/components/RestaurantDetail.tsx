@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useLang } from './LanguageContext'
 import type { Restaurant } from '@/lib/restaurants'
 import { basePath } from '@/lib/basePath'
 import { formatVisited } from '@/lib/format'
+import { MAP_UI } from '@/lib/mapI18n'
 import Lightbox from './Lightbox'
 
 export default function RestaurantDetail({ restaurant }: { restaurant: Restaurant }) {
@@ -82,6 +84,12 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Restauran
         </svg>
         {mapLabel}
       </a>
+      <Link
+        href={`/map?place=${slug}`}
+        className="ml-4 inline-flex items-center font-label text-xs uppercase tracking-widest text-[#0F84B5] hover:text-[#F0742A] transition-colors"
+      >
+        {MAP_UI[lang].seeOnMap}
+      </Link>
 
       <Lightbox
         images={srcs}

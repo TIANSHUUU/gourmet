@@ -55,7 +55,14 @@ export class WalkerController {
   /** 当前可"走到"的店(当前城市 ∩ 当前分类筛选) */
   setPlaces(places: PlacePoint[]): void {
     this.places = places
+    this.clearNear()
+  }
+
+  /** 复位"站在某店门口"的状态,并通知外面把那家店的 near 高亮关掉(否则 feature-state 会一直亮着) */
+  private clearNear(): void {
+    const had = this.near.near !== null
     this.near = NEAR_IDLE
+    if (had) this.events.onNear(null)
   }
 
   position(): LngLat {
@@ -71,7 +78,7 @@ export class WalkerController {
     this.auto = null
     this.marker.setLngLat(p)
     this.marker.setAction('idle')
-    this.near = NEAR_IDLE
+    this.clearNear()
     this.show()
   }
 
@@ -84,6 +91,7 @@ export class WalkerController {
     this.visible = false
     this.auto = null
     this.input = ZERO
+    this.clearNear()
     this.marker.hide()
     this.stopLoop()
   }
@@ -147,7 +155,14 @@ export class WalkerController {
     this.last = now
     if (this.auto) this.stepAuto(now)
     else if (!isZero(this.input)) this.stepFree(dt, now)
-    if (this.auto || !isZero(this.input)) this.raf = requestAnimationFrame(this.frame)
+    // 松开按键站在门口:不再移动,但"停满 0.4 s 才算到达"还要继续计时,所以循环不能停
+    else if (this.isDwelling()) this.checkProximity(this.position(), now)
+    if (this.auto || !isZero(this.input) || this.isDwelling()) this.raf = requestAnimationFrame(this.frame)
+  }
+
+  /** 已经走进某店门口、但这次停留还没触发到达 */
+  private isDwelling(): boolean {
+    return this.near.near !== null && this.near.arrived !== this.near.near
   }
 
   private stepAuto(now: number): void {
@@ -174,7 +189,10 @@ export class WalkerController {
     if (now > this.celebratingUntil) this.marker.setAction('walk')
     // 镜头锁定小人(规格里的"35% 软跟随"简化为锁定)
     this.lockCamera(pos)
+    this.checkProximity(pos, now)
+  }
 
+  private checkProximity(pos: LngLat, now: number): void {
     const r = proximityStep(this.near, pos, this.places, now)
     const nearChanged = r.state.near !== this.near.near
     this.near = r.state

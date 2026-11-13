@@ -13,7 +13,7 @@ export default function KindChips({
   const shown = KIND_ORDER.filter(k => available.includes(k))
   if (shown.length < 2) return null
   return (
-    <div className="flex gap-2 overflow-x-auto">
+    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {shown.map(k => {
         const on = active.includes(k)
         return (

@@ -82,7 +82,8 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
   if (failed) return <MapFallbackList data={data} cities={cities} />
 
   return (
-    <section className="relative h-[calc(100dvh-64px)] min-h-[480px] bg-[#1E242C]" aria-label={ui.title}>
+    // 67px = Header 64px + 非首页的 3px 蓝色下边框
+    <section className="relative h-[calc(100dvh-67px)] min-h-[480px] bg-[#1E242C]" aria-label={ui.title}>
       {hydrated && (
         <MapView
           styleUrl={`${basePath}/maps/painted.json`}

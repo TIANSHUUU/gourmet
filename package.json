@@ -13,7 +13,8 @@
     "notes:pull": "node scripts/notes-pull.mjs",
     "coords:backfill": "node scripts/backfill-coords.mjs",
     "coords:check": "node scripts/backfill-coords.mjs --check",
-    "maps": "node scripts/build-map-style.mjs"
+    "maps": "node scripts/build-map-style.mjs",
+    "maps:worker": "node -e \"require('fs').copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs','public/maps/maplibre-gl-worker.js')\""
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

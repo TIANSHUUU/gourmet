@@ -14,7 +14,7 @@ export default function CityChips({
       on ? 'bg-[#F0742A] text-white' : 'bg-[#1E242C]/80 text-[#F8F2DD] hover:bg-[#1E242C]'
     }`
   return (
-    <div className="flex gap-2 overflow-x-auto">
+    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <button type="button" className={chip(active === null)} onClick={() => onChange(null)}>
         {ui.overview}
       </button>

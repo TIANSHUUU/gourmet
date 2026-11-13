@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   Map as MapLibreMap,
+  setWorkerUrl,
   type GeoJSONSource,
   type MapLayerMouseEvent,
   type StyleSpecification,
 } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Point } from 'geojson'
+import { basePath } from '@/lib/basePath'
 import { makeBadge, makeLabelBackground } from './mapImages'
 import { KIND_ORDER } from '@/lib/map/kinds'
 import { boundsOf } from '@/lib/map/geo'
@@ -67,6 +69,9 @@ export default function MapView(props: Props) {
         if (!res.ok) throw new Error(`样式加载失败 ${res.status} ${styleUrl}`)
         const style = (await res.json()) as StyleSpecification
         if (cancelled) return
+        // maplibre 6 的 ESM worker 靠 import.meta.url 定位,Turbopack 打包后找不到(404 → "Worker failed to load")。
+        // 改用 public/maps/ 下的副本(npm run maps:worker 从 node_modules 同步;升级 maplibre-gl 后要重跑)
+        setWorkerUrl(`${basePath}/maps/maplibre-gl-worker.js`)
         map = new MapLibreMap({
           container: el,
           style,
@@ -190,7 +195,8 @@ export default function MapView(props: Props) {
       else m.flyTo({ center, zoom, pitch, bearing, duration: 1800 })
     } else {
       const b = boundsOf(data.features.map(f => f.geometry.coordinates as LngLat))
-      if (b) m.fitBounds(b, { padding: 60, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
+      // 顶部留 150px:搜索框 + 两排 chips 浮在地图上,别让最北边的点钻到它们底下
+      if (b) m.fitBounds(b, { padding: { top: 150, bottom: 60, left: 60, right: 60 }, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCity, ready])
@@ -223,5 +229,11 @@ export default function MapView(props: Props) {
     src?.setData({ ...data, features: data.features.filter(f => kinds.includes(f.properties.kind)) })
   }, [kinds, data, ready])
 
-  return <div ref={containerRef} className="absolute inset-0" />
+  // 外层负责铺满;maplibre-gl.css 里 `.maplibregl-map{position:relative}`(非 layer)会压过 Tailwind 的 `absolute`,
+  // 所以容器本身用 h-full w-full,不依赖它的 position
+  return (
+    <div className="absolute inset-0">
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  )
 }

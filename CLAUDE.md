@@ -37,5 +37,5 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 
 ## Style
 - Background `#FAFAF7`, accent/terracotta `#C84B2F`, rounded-2xl cards
-- Site name: "菠萝子美食指南" (renamed 2026-07 from 猪比登 to match the pineapple avatar). Logo = cropped pineapple-head mark (`public/logo-mark.png`); favicon = pineapple (`src/app/icon.png`). The old 🐷🕵️/🐽 emojis were dropped.
+- Site name: "菠萝子指南" (2026-11 dropped 美食 to make room for sights & activities; 2026-07 renamed from 猪比登 to match the pineapple avatar). Logo = cropped pineapple-head mark (`public/logo-mark.png`); favicon = pineapple (`src/app/icon.png`). The old 🐷🕵️/🐽 emojis were dropped. English `description` strings still say "restaurants, cafés & bars" on purpose — update them together with the homepage hero copy once sights go live.
 - Footer contact: alubiaroja529@gmail.com

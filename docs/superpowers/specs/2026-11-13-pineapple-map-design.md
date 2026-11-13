@@ -68,17 +68,17 @@
 
 ## 4. 决策表
 
-业主今天不在线,以下决策我先按推荐值定下来并据此写方案;**任何一条不同意,改表即可,方案对应段落跟着改**。
+决策 #1、#6、#7 已于 2026-11-13 由业主确认(Mary's 的坐标链接也已补齐);其余按推荐值定下来并据此写方案。**任何一条不同意,改表即可,方案对应段落跟着改**。
 
 | # | 决策点 | 结论(默认) | 备选 | 影响范围 |
 |---|---|---|---|---|
-| 1 | 放哪里 | **gourmet 站内新增 `/map` 路由**,同仓库、同部署 | 独立新项目 | 全局;站内能直接读 markdown 数据,免去同步 |
+| 1 | 放哪里 | **gourmet 站内新增 `/map` 路由**(业主已确认),同仓库、同部署 | — | 全局;站内能直接读 markdown 数据,免去同步 |
 | 2 | 地图引擎 | **MapLibre GL JS 5 + OpenFreeMap 矢量瓦片**(免费、无 key、travel-timeline 已验证) | MapTiler 免费档 / Protomaps 自托管 | §6 |
 | 3 | 画风路线 | **方案 C** | A 或 B | §2–3、§7 |
 | 4 | 小人形象 | **Phase 2 先复用 travel-timeline 的像素菠萝头**(直接可用,走路动画现成);Phase 3 再换手绘版 | 一开始就等手绘版 | §6.6、§7 |
 | 5 | 弹窗里的「Google 地图信息」 | **v1 = 自己的图文卡片 + 「在 Google 地图打开」按钮**;Google Maps Embed(iframe,免费但要申请 API key)作 Phase 3 可选开关 | 一开始就嵌 iframe | §6.7 |
-| 6 | 美术资产谁产出 | **Phase 1–2 用程序生成的占位图案**(纯色 + 简单纹理),保证流程先跑通;**Phase 3 由业主用图像模型按 §7 的规格与提示词生成**,执行模型只负责接入 | 执行模型自己画(效果不可控,不推荐) | §7、§8 |
-| 7 | 非吃喝内容放哪 | 同站,新建 `src/data/spots/` 目录(与 `restaurants/` 同一套 frontmatter);**首页暂不改**,地图先全量展示 | 单独站点 / 改站名为「菠萝子指南」 | §6.3;站名是否改为「菠萝子指南」留给业主 |
+| 6 | 美术资产谁产出 | **Phase 1–2 用程序生成的占位图案**(纯色 + 简单纹理),保证流程先跑通;**Phase 3 以墨尔本为试点**(业主已确认):业主用图像模型按 §7.1 的资产包与提示词生成,执行模型只负责接入;试点效果满意后再铺开到其他城市,期间其他城市继续占位 | 执行模型自己画(效果不可控,不推荐) | §7.1、§8 |
+| 7 | 非吃喝内容放哪 | 同站,新建 `src/data/spots/` 目录(与 `restaurants/` 同一套 frontmatter);**站名改为「菠萝子指南」(业主已确认,Phase 0 执行)**;首页版式暂不改,地图先全量展示 | 单独站点 | §6.3、§8 Phase 0 |
 | 8 | 评分 | **不展示星级**(沿用 2026-08 现场笔记的决定);Takeout 导入时星级保留在草稿里仅供参考 | 展示 | §6.8 |
 | 9 | 小人走路路径 | Phase 2 直线(含镜头跟随);Phase 3 可选接 Valhalla 公共步行路由沿街走,失败回退直线 | 一直直线 | §6.6 |
 | 10 | 地标 | 每城 3–8 个「一眼认得的」地标,业主列清单,其余全部由 OSM 数据自动出 | 不做地标 | §5.3、§6.3 |
@@ -381,6 +381,78 @@ web/src/data/spots/<slug>.md  或  restaurants/<slug>.md
 
 无缝贴图的检验:执行模型用 sharp 把图 2×2 平铺后截图,肉眼无接缝即可;有接缝就让业主重生成或用「tile」类工具修。
 
+### 7.1 墨尔本试点资产包(业主现在就可以开始生成)
+
+**为什么选墨尔本**:店最多(4 家)、朋友最常用、地标最多也最考验风格一致性;而且贴图与徽章本来就是全站通用的,做一次所有城市都受益。十和田留给 Phase 4 的「整张插画叠加」实验更合适。
+
+**交付方式**:生成的 PNG 直接放进 `/Users/tantianshu/Documents/code/gourmet/map/inbox/melbourne/`(文件名按下表;尺寸不必精确,执行模型负责缩放、抠图、重命名并搬进 `web/public/map-assets/`)。
+
+**生成通用守则**
+
+1. 同一个模型、同一个会话里连续生成,每条提示词末尾都带上下面这段「画风圣经」;若工具支持参考图,附上 `map/visual-ref.jpeg` 作风格参考。
+2. 一律 1024×1024 出图,缩小由执行模型做。
+3. 四张贴图必须**无缝可平铺**:工具有「tile / 平铺」选项就打开(Midjourney `--tile`、Stable Diffusion 的 tiling),没有就在提示词里强调;自检:把同一张图四份拼成 2×2,接缝处看不出来才算过。
+4. 徽章、地标、店面:**透明背景**优先;工具不支持就用纯白背景,之后在 macOS 访达里右键 → 快速操作 → 「移除背景」,或交给执行模型用 rembg 抠。
+5. 单张不满意就重生成那一张,不要整批重来;整批「色温」要一致,最后把全部缩略图摆在一起看一眼。
+
+**画风圣经(每条提示词末尾粘贴)**
+
+```
+Hand-painted storybook illustration style, 60-degree bird's-eye view, warm yellow-green meadows, cream-coloured footpaths with slightly darker edges, teal-blue water with thin white ripple strokes, houses with grey-brown tiled roofs and cream walls, clusters of round tree canopies in dark green, light green and occasional pink, soft light from the top-left with short shadows, saturated but gentle colours, clean edges, no text, no people, no watermark.
+```
+
+**A. 通用贴图(4 张,全站共用)**
+
+| 文件名 | 提示词(末尾加画风圣经) |
+|---|---|
+| `pat-wood.png` | Seamless tileable texture seen from above at a slight tilt: dense clusters of round tree canopies covering a warm yellow-green meadow, a mix of dark green and light green canopies with a few pink blossom trees, tiny soft shadows falling to the bottom-right, the four edges must tile seamlessly with no visible border, square 1024x1024. |
+| `pat-grass.png` | Seamless tileable texture of a warm yellow-green meadow with subtle hand-painted brush strokes, a few tiny shrubs and flower dots scattered sparsely, no trees, the four edges tile seamlessly, square 1024x1024. |
+| `pat-water.png` | Seamless tileable texture of calm teal-blue water with thin white hand-painted ripple strokes and gentle colour variation, the four edges tile seamlessly, square 1024x1024. |
+| `pat-sand.png` | Seamless tileable texture of pale cream sand with faint hand-painted grain and a few small pebbles, the four edges tile seamlessly, square 1024x1024. |
+
+**B. 分类徽章(7 张,全站共用;同一会话连续出,保证成套)**
+
+模板:`A single round badge icon: a cream circular background with a thin warm-brown outline, containing 【主体】, centred, isolated on a transparent background (or plain white if transparency is unsupported), flat shading, bold simple shapes that stay readable when shrunk to 48 pixels, square 1024x1024.` + 画风圣经
+
+| 文件名 | 【主体】 |
+|---|---|
+| `badge-food.png` | a steaming rice bowl with a pair of chopsticks |
+| `badge-cafe.png` | a coffee cup with latte art on a small saucer |
+| `badge-bar.png` | a wine glass next to a coupe cocktail glass |
+| `badge-sight.png` | a vintage camera |
+| `badge-activity.png` | a hiking boot with a tiny flag |
+| `badge-shop.png` | a paper shopping bag with a ribbon |
+| `badge-stay.png` | a cosy bed with a pillow and a folded blanket |
+
+**C. 墨尔本地标(6 张;坐标为约值,执行模型接入时用 OSM 核对)**
+
+模板:`An isolated miniature illustration of 【地标描述】, seen from a 60-degree bird's-eye view, centred on a transparent background (or plain white), simplified and chunky like a tabletop model, bold readable silhouette that still reads when shrunk to 64 pixels, square 1024x1024.` + 画风圣经
+
+| 文件名 | 【地标描述】 | 约坐标 [lng, lat] |
+|---|---|---|
+| `lm-flinders.png` | Flinders Street Station in Melbourne: long yellow Edwardian facade, green copper dome, clock tower at the corner | [144.9671, -37.8183] |
+| `lm-arts-centre.png` | the Arts Centre Melbourne spire: a tall white lattice spire rising from a round base | [144.9683, -37.8206] |
+| `lm-mcg.png` | the Melbourne Cricket Ground: a huge oval stadium with a white roof ring and tall light towers, green pitch inside | [144.9834, -37.8200] |
+| `lm-exhibition.png` | the Royal Exhibition Building: a long cream Victorian hall with a large central dome, formal gardens and a fountain in front | [144.9717, -37.8047] |
+| `lm-shrine.png` | the Shrine of Remembrance: a grey stone stepped-pyramid roof on a classical columned base, surrounded by lawn | [144.9734, -37.8305] |
+| `lm-luna-park.png` | Luna Park St Kilda: a giant laughing face gateway between two towers, a wooden rollercoaster behind | [144.9767, -37.8678] |
+
+**D. 店面小插画(4 张,可选,第二批再做)**
+
+每家用业主自己拍的门脸照片做参考图(img2img):`Using the attached photo as reference, a small isolated storefront illustration of 【店名】 in Melbourne, 60-degree bird's-eye view, centred on a transparent background, simplified like a tabletop model, keep the real facade colours and signage shapes but no readable text, square 1024x1024.` + 画风圣经。文件名 `shop-marys.png`、`shop-dons.png`、`shop-zareh.png`、`shop-death-and-co.png`。
+
+**E. 手绘菠萝子(可选,随时)**
+
+按 §7 表格最后一行:先出 4 张同风格单图(站立 / 迈左腿 / 迈右腿 / 举手庆祝),主体是现有的菠萝子形象(墨镜、菠萝冠、大笑容),文件名 `pp-idle.png`、`pp-walk-a.png`、`pp-walk-b.png`、`pp-cheer.png`;执行模型用 sharp 拼成与像素版同布局的雪碧图。
+
+**试点验收(业主看截图判断)**
+
+- 四张贴图 2×2 拼接无接缝,铺满大面积时没有明显的重复感;
+- 七个徽章摆在一起像一套;缩到 48 px 还分得清;
+- 六个地标缩到 64 px 仍认得出是哪;
+- `/map` 墨尔本 z15 截图与参考图并排,色温与「小房子小树」的密度感接近;
+- 以上任一项不过,只重做对应那几张。
+
 ---
 
 ## 8. 分阶段路线图
@@ -389,10 +461,11 @@ web/src/data/spots/<slug>.md  或  restaurants/<slug>.md
 
 ### Phase 0 数据打底(无 UI,半个会话)
 
-- `scripts/backfill-coords.mjs`:复制 `notes-app/shared/note.mjs` 的 `extractCoords`,遍历 `restaurants/*.md`,写回 `coords`;抠不到的(目前已知 `marys.md` 的 `map_url` 是搜索链接,没有坐标)打印清单。
+- `scripts/backfill-coords.mjs`:复制 `notes-app/shared/note.mjs` 的 `extractCoords`,遍历 `restaurants/*.md`,写回 `coords`;抠不到的打印清单(目前 6 条 `map_url` 都是带 `!3d…!4d…` 的 place 链接,应全部自动命中;`marys.md` 的链接已于 2026-11-13 从搜索链接换成 place 链接)。
+- **站名改为「菠萝子指南」**:`src/components/Header.tsx`(品牌文字)、`src/app/layout.tsx`(`title`、`openGraph.title`、`twitter.title` 三处)、`CLAUDE.md` Style 节。英文 `description` 与首页 hero 副标题(`HomepageClient.tsx` 的 `sub` 两处)先不动,等景点内容上线再一起改。`src/app/opengraph-image.jpg` / `twitter-image.jpg` 先打开看画面里有没有旧站名,有则报告给业主重新出图,不要自行 P 图。
 - `src/lib/places.ts` + zod + 单测;`src/data/map/cities.json`(墨尔本 / 十和田 / 芒特甘比尔);`src/data/spots/` 空目录 + `.gitkeep`。
 - `web/CLAUDE.md` 增补:新字段、新目录、`npm run maps`、本策划案路径。
-- **验收**:`npm run test`、`npm run build` 全绿;单测断言每个数据文件都有合法 `coords`;Mary's 的坐标由业主给一条带坐标的 Google 地图链接后补上。
+- **验收**:`npm run test`、`npm run build` 全绿;单测断言每个数据文件都有合法 `coords`;6 家店坐标全部由脚本自动抠出,零人工;Header 与页面 `<title>` 显示「菠萝子指南」。
 
 ### Phase 1 地图 MVP(1–2 个会话)
 
@@ -406,10 +479,10 @@ web/src/data/spots/<slug>.md  或  restaurants/<slug>.md
 - 复制像素雪碧图 + CSS;`walker.ts` 状态机(先写测试);HTML marker 挂载;点标签 → 走过去 → 到达弹卡;键盘 + `DPad` 自由操控 + 邻近触发;镜头软跟随;reduced-motion 分支;右下「回到小人」按钮。
 - **验收**:桌面按方向键小人移动,走进 Don's 30 m 弹卡片,走开收起;点任意标签 ≤ 4 s 到达并弹卡;开启系统「减少动态效果」后瞬移;单测覆盖状态机与邻近判定。
 
-### Phase 3 画风升级(美术到位后,1–2 个会话;可与 Phase 4 并行)
+### Phase 3 画风升级·墨尔本试点(§7.1 资产到位后,1–2 个会话;可与 Phase 4 并行)
 
-- 接入 §7 贴图(重跑 `npm run maps`)、分类徽章 v2、地标图层 + 墨尔本地标清单、店面小插画(有则显示)、手绘菠萝子(帧表不变);可选:`hillshade`(DEM 源,例如 AWS 开放数据的 terrarium 瓦片,**使用前核实可用性与条款**)、Valhalla 沿街行走、Google Maps Embed 开关(需 key)。
-- **验收**:z12 / z15 / z17 三档各截一张墨尔本与十和田的图,与参考图并排给业主看;无控制台报错;贴图无接缝;帧率在手机上不掉到 30 以下。
+- **试点城市 = 墨尔本**,其他城市继续用占位。接入 §7.1 资产包:四张贴图(重跑 `npm run maps`)、七个分类徽章、墨尔本地标图层(6 个)、店面小插画(有则显示)、手绘菠萝子(帧表不变,若已生成);可选:`hillshade`(DEM 源,例如 AWS 开放数据的 terrarium 瓦片,**使用前核实可用性与条款**)、Valhalla 沿街行走、Google Maps Embed 开关(需 key)。
+- **验收**:z12 / z15 / z17 三档各截一张墨尔本的图,与参考图并排给业主看(十和田此时仍是占位,截一张作对照);无控制台报错;贴图无接缝;帧率在手机上不掉到 30 以下。**业主点头后**,再按 §7.1 同一套提示词为十和田、芒特甘比尔各生成 2–3 个地标,铺开。
 
 ### Phase 4 内容扩充(持续)
 
@@ -441,7 +514,7 @@ web/src/data/spots/<slug>.md  或  restaurants/<slug>.md
 | 美术风格漂移 | 画风圣经 + 同批次生成 + 统一光源方向;徽章一次性生成全套 |
 | 「像参考图」的期望落差 | Phase 1 就给业主看 v0 截图校准预期;点状插画是增量,随时可加 |
 | 执行模型对地图引擎不熟 | §6 已给出具体 API 名与 travel-timeline 可照抄的文件(附录 A);MapLibre 官方示例:`add-a-pattern-to-a-polygon`、`display-buildings-in-3d`、`add-a-stretchable-image-to-the-map`(icon-text-fit)、`add-an-image` |
-| 站名与定位(「美食指南」装不下景点) | 不影响 Phase 0–3;Phase 4 前业主决定是否改名「菠萝子指南」 |
+| 站名与定位 | 已决定改名「菠萝子指南」(Phase 0 执行);英文 description 与首页文案在景点内容上线时同步更新 |
 | Takeout 格式再变 | 脚本遇到未知格式即打印 key 并退出,人工看一眼补一个分支 |
 
 ---
@@ -450,13 +523,11 @@ web/src/data/spots/<slug>.md  或  restaurants/<slug>.md
 
 | 事项 | 何时需要 | 说明 |
 |---|---|---|
-| 确认 §4 决策表(或改) | Phase 0 前 | 尤其 #1、#4、#5、#7 |
-| Mary's 的带坐标 Google 地图链接 | Phase 0 | 现链接是搜索链接,抠不出坐标;或直接给一对经纬度 |
-| 每城地标清单(3–8 个,名字即可) | Phase 3 前 | 墨尔本先来;十和田/芒特甘比尔各 2–3 个 |
-| §7 美术资产 | Phase 3 | 用图像模型按规格生成;或授权执行模型继续用程序占位 |
+| 确认 §4 决策表剩余项(或改) | Phase 0 前 | #1、#6、#7 已确认;#4、#5 等仍按默认 |
+| 墨尔本地标清单确认 | Phase 3 前 | §7.1 预填了 6 个,可增删;十和田/芒特甘比尔待试点通过后再列 |
+| 墨尔本试点资产包(§7.1) | 随时可开始,Phase 3 前到位 | 放进 `/Users/tantianshu/Documents/code/gourmet/map/inbox/melbourne/` 即可,命名与尺寸由执行模型规整 |
 | Google Takeout 导出(Maps (your places) + Maps 照片) | Phase 4 | 解压后告诉路径即可 |
 | Google Maps Platform key(可选) | 仅当要 Embed | 按 referrer 限制 |
-| 站名是否改「菠萝子指南」 | Phase 4 前 | 不影响前几阶段 |
 
 ---
 

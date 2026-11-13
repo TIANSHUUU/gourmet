@@ -6,7 +6,7 @@ city: "Melbourne"
 category: food
 cuisine_en: "Nigerian"
 cuisine_zh: "尼日利亚菜"
-map_url: "https://www.google.com/maps/search/Mary's+Collingwood+Nigerian"
+map_url: "https://www.google.com/maps/place/Mary's/@-37.7990959,144.9846762,17z/data=!3m1!4b1!4m6!3m5!1s0x6ad643e638635d91:0xe51525856105a609!8m2!3d-37.7990959!4d144.9872511!16s%2Fg%2F11xscsdd2l?entry=ttu&g_ep=EgoyMDI2MTExMC4wIKXMDSoASAFQAw%3D%3D"
 map_type: google
 visited: "2026-06"
 tagline_en: "No question — a Collingwood must. Smoky, soulful, gloriously unpretentious."

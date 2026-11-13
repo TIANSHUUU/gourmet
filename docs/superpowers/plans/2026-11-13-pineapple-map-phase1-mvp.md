@@ -1585,6 +1585,7 @@ git commit -m "Add Phase 1 map screenshots"
 
 **Files:**
 - Modify: `CLAUDE.md`
+- Modify: `.github/workflows/deploy.yml`
 
 - [ ] **Step 1: 用 CI 同样的环境变量构建**
 
@@ -1613,6 +1614,57 @@ SERVE_DIR=$(mktemp -d) && ln -s "$PWD/out" "$SERVE_DIR/gourmet" && (cd "$SERVE_D
 - Label background and kind badges are drawn on a canvas at runtime (`mapImages.ts`); Phase 3 replaces badges with painted PNGs.
 ```
 
+- [ ] **Step 3b: 修正 CLAUDE.md 里几处过期内容**(Phase 0 审阅时发现,与地图无关但顺手改掉)
+
+`## Style` 里的
+
+```
+- Background `#FAFAF7`, accent/terracotta `#C84B2F`, rounded-2xl cards
+```
+
+改为
+
+```
+- Background `#FCFAF4` (cream), ink `#13314A`, accents `#F0742A` (orange) / `#0F84B5` (blue); map page chrome `#1E242C`. (Mediterranean redesign 2026-06 — the old `#FAFAF7` / `#C84B2F` are gone.)
+```
+
+`## Status` 里的
+
+```
+- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne)
+```
+
+改为
+
+```
+- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Kensington/Melbourne)
+```
+
+`## Status` 里以「**地图计划(2026-11-13)**」开头的那一整行改为
+
+```
+- 地图(2026-11):总策划案 `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`;Phase 0(coords / `places.ts` / `cities.json` / 改站名)已上线,Phase 1(`/map`)见下方「Map」一节,Phase 2+(小人、手绘资产、Takeout 导入)待做。
+```
+
+- [ ] **Step 3c: 部署工作流先跑测试再构建**
+
+`.github/workflows/deploy.yml` 里
+
+```yaml
+      - run: npm ci
+      - run: npm run build
+```
+
+改为
+
+```yaml
+      - run: npm ci
+      - run: npm run test
+      - run: npm run build
+```
+
+理由:`places.test.ts` / `cities.test.ts` 的真实数据用例是坐标与城市归属的第一道守卫;`/map` 上线后构建也会校验,但测试更早、报错更清楚。
+
 - [ ] **Step 4: 三件套**
 
 Run: `npm run lint && npm run test && npm run build`
@@ -1621,8 +1673,8 @@ Expected: 全绿。
 - [ ] **Step 5: Commit**
 
 ```bash
-git add CLAUDE.md
-git commit -m "Docs: /map maintenance notes in CLAUDE.md"
+git add CLAUDE.md .github/workflows/deploy.yml
+git commit -m "Docs: /map notes, refresh stale CLAUDE.md lines; run tests in deploy workflow"
 ```
 
 - [ ] **Step 6: 给业主的报告(不要 push、不要合并)**
@@ -1639,4 +1691,5 @@ git commit -m "Docs: /map maintenance notes in CLAUDE.md"
 - [ ] 阻止样式请求后重载 → 降级列表
 - [ ] `NEXT_PUBLIC_BASE_PATH=/gourmet npm run build` 后的产物在 `/gourmet/` 前缀下资源路径全部正确
 - [ ] `npm run lint && npm run test && npm run build` 全绿
+- [ ] `deploy.yml` 已加 `npm run test`;CLAUDE.md 的配色 / Added so far / 地图状态三处已更新
 - [ ] 截图已存档;报告已交,未 push

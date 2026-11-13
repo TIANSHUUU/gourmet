@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "melbourne",
+    "name_zh": "墨尔本",
+    "name_en": "Melbourne",
+    "bounds": [[144.55, -38.1], [145.4, -37.55]],
+    "view": { "center": [144.9631, -37.8136], "zoom": 12.5, "pitch": 30, "bearing": 0 }
+  },
+  {
+    "slug": "towada",
+    "name_zh": "十和田(青森)",
+    "name_en": "Towada, Aomori",
+    "bounds": [[141.1, 40.55], [141.3, 40.68]],
+    "view": { "center": [141.205, 40.6151], "zoom": 15, "pitch": 50, "bearing": 0 }
+  },
+  {
+    "slug": "mount-gambier",
+    "name_zh": "芒特甘比尔",
+    "name_en": "Mount Gambier",
+    "bounds": [[140.7, -37.88], [140.85, -37.78]],
+    "view": { "center": [140.7838, -37.8297], "zoom": 15, "pitch": 50, "bearing": 0 }
+  }
+]

@@ -34,7 +34,7 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 7. `src/data/map/cities.json` decides which city a place belongs to **by bounds**, not by its `city` string. A place outside every city makes `src/lib/map/cities.test.ts` fail — add a city entry (slug, names, bounds, default view) when that happens.
 
 ## Status
-- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Kensington/Melbourne)
+- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Collingwood/Melbourne)
 - `map_type` drives the map CTA in `RestaurantDetail.tsx`: `amap` → 「在高德地图查看 / Open in Amap」, anything else → Google Maps wording. Mainland China entries can now use `map_type: amap` with an `amap.com` / `uri.amap.com` link.
 - Source folders `cafe/` and `restaurant/`/`winebar/` at the gourmet root may have more unpublished entries — check before assuming all content is live.
 - 地图(2026-11):总策划案 `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`;Phase 0(coords / `places.ts` / `cities.json` / 改站名)已上线,Phase 1(`/map`)见下方「Map」一节,Phase 2+(小人、手绘资产、Takeout 导入)待做。

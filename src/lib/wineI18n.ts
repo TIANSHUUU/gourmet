@@ -3,6 +3,7 @@ import type { WineType, Localized } from '@/lib/wines'
 export type WineUIStrings = {
   navRestaurants: string
   navWine: string
+  navMap: string
   listTitle: string
   listIntro: string
   searchPlaceholder: string
@@ -35,6 +36,7 @@ export const WINE_UI: Record<'en' | 'zh', WineUIStrings> = {
   en: {
     navRestaurants: 'Food',
     navWine: 'Wine',
+    navMap: 'Map',
     listTitle: 'Wine Diary',
     listIntro: "Every bottle I've opened — and written down.",
     searchPlaceholder: 'Search wine / winery / region / grape…',
@@ -71,6 +73,7 @@ export const WINE_UI: Record<'en' | 'zh', WineUIStrings> = {
   zh: {
     navRestaurants: '美食',
     navWine: '酒评',
+    navMap: '地图',
     listTitle: '酒评日记',
     listIntro: '每一瓶我开过、写下来的酒。',
     searchPlaceholder: '搜索酒名 / 酒庄 / 产区 / 品种…',

@@ -1,0 +1,73 @@
+'use client'
+
+import Link from 'next/link'
+import { useLang } from '@/components/LanguageContext'
+import { basePath } from '@/lib/basePath'
+import { formatVisited } from '@/lib/format'
+import { MAP_UI } from '@/lib/mapI18n'
+import { KIND_COLORS } from '@/lib/map/kinds'
+import type { PlaceFeature } from '@/lib/map/placesToGeoJSON'
+
+export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature; onClose: () => void }) {
+  const { lang } = useLang()
+  const ui = MAP_UI[lang]
+  const p = feature.properties
+  const tagline = lang === 'en' ? p.tagline_en : p.tagline_zh
+  const cuisine = lang === 'en' ? p.cuisine_en : p.cuisine_zh
+  const where = lang === 'en' ? `${p.suburb}, ${p.city}` : `${p.city} · ${p.suburb}`
+  const visited = formatVisited(p.visited, lang)
+  const mapLabel = p.map_type === 'amap' ? ui.openAmap : ui.openGoogle
+
+  return (
+    <aside
+      role="dialog"
+      aria-label={p.name}
+      className="absolute z-20 inset-x-0 bottom-0 md:inset-x-auto md:right-4 md:top-4 md:bottom-4 md:w-[360px] flex flex-col max-h-[70dvh] md:max-h-none overflow-hidden rounded-t-2xl md:rounded-2xl bg-[#FCFAF4] text-[#13314A] shadow-2xl"
+    >
+      {p.cover && (
+        <div className="relative shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`${basePath}/images/${p.slug}/${p.cover}`} alt={p.name} className="w-full h-40 md:h-52 object-cover" />
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={ui.close}
+        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white text-lg leading-none"
+      >
+        ×
+      </button>
+      <div className="p-4 flex flex-col gap-2 overflow-y-auto">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="font-display text-2xl font-bold">{p.name}</h2>
+          <span
+            className="font-label text-[10px] uppercase tracking-widest text-white px-2 py-0.5 rounded-full"
+            style={{ background: KIND_COLORS[p.kind] }}
+          >
+            {ui.kinds[p.kind]}
+          </span>
+        </div>
+        <p className="font-label text-[11px] uppercase tracking-wider text-[#8A99A6]">{cuisine} · {where}</p>
+        {visited && <p className="font-label text-[11px] uppercase tracking-wider text-[#F0742A]">{visited}</p>}
+        {tagline && <p className="text-base leading-relaxed">{tagline}</p>}
+        <div className="flex gap-2 pt-2 flex-wrap">
+          <Link
+            href={`/${p.slug}`}
+            className="inline-flex items-center bg-[#0F84B5] text-white font-label text-xs font-bold uppercase tracking-widest px-4 py-2 hover:bg-[#F0742A] transition-colors"
+          >
+            {ui.viewStory}
+          </Link>
+          <a
+            href={p.map_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center border-[1.5px] border-[#0F84B5] text-[#0F84B5] font-label text-xs font-bold uppercase tracking-widest px-4 py-2 hover:border-[#F0742A] hover:text-[#F0742A] transition-colors"
+          >
+            {mapLabel}
+          </a>
+        </div>
+      </div>
+    </aside>
+  )
+}

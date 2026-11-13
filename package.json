@@ -12,10 +12,13 @@
     "notes:deploy": "wrangler deploy --config notes-app/wrangler.jsonc",
     "notes:pull": "node scripts/notes-pull.mjs",
     "coords:backfill": "node scripts/backfill-coords.mjs",
-    "coords:check": "node scripts/backfill-coords.mjs --check"
+    "coords:check": "node scripts/backfill-coords.mjs --check",
+    "maps": "node scripts/build-map-style.mjs",
+    "maps:worker": "node -e \"require('fs').copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs','public/maps/maplibre-gl-worker.js')\""
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
+    "maplibre-gl": "^6.18.0",
     "next": "16.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -23,6 +26,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260808.1",
     "@tailwindcss/postcss": "^4",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

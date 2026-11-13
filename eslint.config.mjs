@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // 独立 Worker / Node 脚本,不套 Next 的前端 lint 规则:
     "notes-app/**",
     "scripts/**",
+    // 静态资源(含从 node_modules 拷来的 maplibre worker,压缩过的 500KB 单行 JS):不 lint
+    "public/**",
   ]),
 ]);
 

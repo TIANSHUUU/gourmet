@@ -12,6 +12,7 @@ export default function Header() {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const isWine = pathname.startsWith('/wine')
+  const isMap = pathname.startsWith('/map')
   const ui = WINE_UI[lang]
 
   const navClass = (active: boolean) =>
@@ -37,8 +38,9 @@ export default function Header() {
         </Link>
         <div className="flex items-center gap-3 sm:gap-5 shrink-0">
           <nav className="flex items-center gap-3 sm:gap-4">
-            <Link href="/" className={navClass(!isWine)}>{ui.navRestaurants}</Link>
+            <Link href="/" className={navClass(!isWine && !isMap)}>{ui.navRestaurants}</Link>
             <Link href="/wine" className={navClass(isWine)}>{ui.navWine}</Link>
+            <Link href="/map" className={navClass(isMap)}>{ui.navMap}</Link>
           </nav>
           <button
             onClick={toggle}

@@ -1,7 +1,7 @@
 ---
 slug: zareh
 name: "Zareh"
-suburb: "Kensington"
+suburb: "Collingwood"
 city: "Melbourne"
 category: food
 cuisine_en: "Middle Eastern"

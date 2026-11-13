@@ -67,6 +67,11 @@ export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature;
             {mapLabel}
           </a>
         </div>
+        <p className="md:hidden pt-3 text-[10px] leading-snug text-[#8A99A6]">
+          Map © <a className="underline" href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>
+          {' '}© <a className="underline" href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a>
+          {' '}Data © <a className="underline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors
+        </p>
       </div>
     </aside>
   )

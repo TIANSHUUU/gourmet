@@ -33,6 +33,7 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 - Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne)
 - `map_type` drives the map CTA in `RestaurantDetail.tsx`: `amap` → 「在高德地图查看 / Open in Amap」, anything else → Google Maps wording. Mainland China entries can now use `map_type: amap` with an `amap.com` / `uri.amap.com` link.
 - Source folders `cafe/` and `restaurant/`/`winebar/` at the gourmet root may have more unpublished entries — check before assuming all content is live.
+- **地图计划(2026-11-13)**:手绘俯视风互动地图 + 菠萝子小人的总策划案在 `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`,分 Phase 0–4,待业主审阅后按阶段写实施计划。
 
 ## Style
 - Background `#FAFAF7`, accent/terracotta `#C84B2F`, rounded-2xl cards

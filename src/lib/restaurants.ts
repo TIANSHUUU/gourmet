@@ -18,13 +18,15 @@ export type Restaurant = {
   tagline_en?: string
   tagline_zh?: string
   images: string[]
+  coords?: [number, number] // [lng, lat];Phase 0 起所有文件都有,地图层(places.ts)强校验
+  place_id?: string
   review_en: string
   review_zh: string
 }
 
 const dataDir = path.join(process.cwd(), 'src/data/restaurants')
 
-function parseReviews(content: string): { en: string; zh: string } {
+export function parseReviews(content: string): { en: string; zh: string } {
   const enMatch = content.match(/## en\s+([\s\S]*?)(?=## zh|$)/i)
   const zhMatch = content.match(/## zh\s+([\s\S]*?)$/i)
   return {

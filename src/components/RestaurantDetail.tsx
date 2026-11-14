@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useLang } from './LanguageContext'
-import type { Restaurant } from '@/lib/restaurants'
+import type { Place } from '@/lib/places'
 import { basePath } from '@/lib/basePath'
 import { formatVisited } from '@/lib/format'
 import { MAP_UI } from '@/lib/mapI18n'
 import Lightbox from './Lightbox'
 
-export default function RestaurantDetail({ restaurant }: { restaurant: Restaurant }) {
+export default function RestaurantDetail({ restaurant }: { restaurant: Place }) {
   const { lang } = useLang()
   const {
     slug, name, suburb, city, cuisine_en, cuisine_zh,

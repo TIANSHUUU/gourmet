@@ -14,6 +14,13 @@ export type MapUIStrings = {
   mapFailedTitle: string
   mapFailedHint: string
   seeOnMap: string
+  recenter: string
+  togglePitch: string
+  dpad: string
+  up: string
+  down: string
+  left: string
+  right: string
 }
 
 export const MAP_UI: Record<'en' | 'zh', MapUIStrings> = {
@@ -34,6 +41,13 @@ export const MAP_UI: Record<'en' | 'zh', MapUIStrings> = {
     mapFailedTitle: 'The map could not load',
     mapFailedHint: 'Here is the full list instead — every place still links to its page.',
     seeOnMap: 'See on the map →',
+    recenter: 'Back to the pineapple',
+    togglePitch: 'Toggle tilt',
+    dpad: 'Move the pineapple',
+    up: 'Move up',
+    down: 'Move down',
+    left: 'Move left',
+    right: 'Move right',
   },
   zh: {
     title: '菠萝子地图',
@@ -52,5 +66,12 @@ export const MAP_UI: Record<'en' | 'zh', MapUIStrings> = {
     mapFailedTitle: '地图没能加载',
     mapFailedHint: '先看列表吧,每一家都能点进详情。',
     seeOnMap: '在地图上看 →',
+    recenter: '回到菠萝子',
+    togglePitch: '切换俯视',
+    dpad: '操控菠萝子',
+    up: '向上',
+    down: '向下',
+    left: '向左',
+    right: '向右',
   },
 }

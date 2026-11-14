@@ -1,17 +1,21 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLang } from '@/components/LanguageContext'
 import { basePath } from '@/lib/basePath'
 import { MAP_UI } from '@/lib/mapI18n'
 import { cityOf, type City } from '@/lib/map/cities'
 import { KIND_ORDER } from '@/lib/map/kinds'
 import { parseMapUrl, serializeMapUrl } from '@/lib/map/urlState'
+import { dirFromKeys, WALK_KEYS } from '@/lib/map/walker'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
 import type { LngLat, PlaceKind } from '@/lib/places'
+import type { MapApi } from './MapView'
 import CityChips from './CityChips'
+import DPad from './DPad'
 import KindChips from './KindChips'
+import MapControls from './MapControls'
 import MapFallbackList from './MapFallbackList'
 import MapSearch from './MapSearch'
 import PlaceCard from './PlaceCard'
@@ -24,15 +28,21 @@ const MapView = dynamic(() => import('./MapView'), {
   ),
 })
 
+const isTypingTarget = (t: EventTarget | null) =>
+  t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)
+
 export default function MapPageClient({ data, cities }: { data: PlaceCollection; cities: City[] }) {
   const { lang } = useLang()
   const ui = MAP_UI[lang]
   const [activeCity, setActiveCity] = useState<string | null>(null)
   const [activeSlug, setActiveSlug] = useState<string | null>(null)
+  const [walkTarget, setWalkTarget] = useState<{ slug: string; nonce: number } | null>(null)
   const [kinds, setKinds] = useState<PlaceKind[]>(KIND_ORDER)
   const [failed, setFailed] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
   const [hydrated, setHydrated] = useState(false)
+  const apiRef = useRef<MapApi | null>(null)
 
   const bySlug = useMemo(() => new Map(data.features.map(f => [f.properties.slug, f])), [data])
   const available = useMemo(
@@ -41,7 +51,7 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
   )
   const focusFeature: PlaceFeature | null = activeSlug ? (bySlug.get(activeSlug) ?? null) : null
 
-  // 首次挂载:读 URL、读系统动效偏好(静态导出下不用 useSearchParams,避免 Suspense 包装)。
+  // 首次挂载:读 URL、读系统动效偏好、判断触屏(静态导出下不用 useSearchParams,避免 Suspense 包装)。
   // 这是「挂载后一次性读取浏览器状态」:首帧必须与服务端 HTML 一致,不能把 window 读进 useState 初始值,
   // 所以这里同步 setState 是有意的(react-hooks/set-state-in-effect 的告警在此不适用)。
   useEffect(() => {
@@ -52,6 +62,7 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
     setActiveCity(city && cities.some(c => c.slug === city) ? city : cityFromPlace)
     setActiveSlug(f ? f.properties.slug : null)
     setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches)
     setHydrated(true)
   }, [bySlug, cities])
 
@@ -62,21 +73,67 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
     window.history.replaceState(null, '', `${window.location.pathname}${qs}`)
   }, [activeCity, activeSlug, hydrated])
 
+  // 键盘操控:方向键 / WASD;在输入框里打字时不劫持;按住多个键走对角线;窗口失焦时松开
+  useEffect(() => {
+    const pressed = new Set<string>()
+    const emit = () => apiRef.current?.setInput(dirFromKeys(pressed))
+    const down = (e: KeyboardEvent) => {
+      if (!WALK_KEYS.has(e.code) || isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) return
+      e.preventDefault() // 方向键别滚页面
+      if (pressed.has(e.code)) return
+      pressed.add(e.code)
+      emit()
+    }
+    const up = (e: KeyboardEvent) => {
+      if (!pressed.delete(e.code)) return
+      emit()
+    }
+    const clear = () => {
+      if (pressed.size === 0) return
+      pressed.clear()
+      emit()
+    }
+    window.addEventListener('keydown', down)
+    window.addEventListener('keyup', up)
+    window.addEventListener('blur', clear)
+    return () => {
+      window.removeEventListener('keydown', down)
+      window.removeEventListener('keyup', up)
+      window.removeEventListener('blur', clear)
+    }
+  }, [])
+
+  // 点标签 / 搜索选中:减少动态时直接开卡片(小人瞬移),否则让小人走过去,到了再开
   const pickPlace = useCallback((slug: string) => {
     const f = bySlug.get(slug)
     if (!f) return
     const c = cityOf(f.geometry.coordinates as LngLat, cities)
     if (c) setActiveCity(c.slug)
-    setActiveSlug(slug)
-  }, [bySlug, cities])
+    if (reducedMotion) {
+      setActiveSlug(slug)
+      return
+    }
+    setActiveSlug(null)
+    setWalkTarget({ slug, nonce: Date.now() })
+  }, [bySlug, cities, reducedMotion])
 
   const pickCity = useCallback((slug: string | null) => {
     setActiveCity(slug)
     setActiveSlug(null)
+    setWalkTarget(null)
   }, [])
 
   const toggleKind = useCallback((k: PlaceKind) => {
     setKinds(prev => (prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]))
+  }, [])
+
+  const handleArrive = useCallback((slug: string) => {
+    setWalkTarget(null)
+    setActiveSlug(slug)
+  }, [])
+
+  const handleLeave = useCallback((slug: string) => {
+    setActiveSlug(prev => (prev === slug ? null : prev))
   }, [])
 
   if (failed) return <MapFallbackList data={data} cities={cities} />
@@ -91,10 +148,14 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
           cities={cities}
           activeCity={activeCity}
           focusPlace={focusFeature}
+          walkTarget={walkTarget}
           kinds={kinds}
           reducedMotion={reducedMotion}
+          apiRef={apiRef}
           onPlaceClick={pickPlace}
           onMapClick={() => setActiveSlug(null)}
+          onArrive={handleArrive}
+          onLeave={handleLeave}
           onFail={err => { console.error('[map] fallback to list:', err); setFailed(true) }}
         />
       )}
@@ -104,6 +165,18 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
         <div className="pointer-events-auto"><CityChips cities={cities} active={activeCity} onChange={pickCity} /></div>
         <div className="pointer-events-auto"><KindChips available={available} active={kinds} onToggle={toggleKind} /></div>
       </div>
+      {/* 左下:回到菠萝子 / 切换俯视(在署名条上方);只在城市视图里有小人时显示 */}
+      {activeCity && (
+        <div className="absolute left-3 bottom-9 z-10">
+          <MapControls onRecenter={() => apiRef.current?.recenter()} onTogglePitch={() => apiRef.current?.togglePitch()} />
+        </div>
+      )}
+      {/* 右下:触屏才有虚拟方向键;卡片打开时让位 */}
+      {activeCity && isTouch && !focusFeature && (
+        <div className="absolute right-3 bottom-3 z-10">
+          <DPad onDir={d => apiRef.current?.setInput(d)} />
+        </div>
+      )}
       {focusFeature && <PlaceCard feature={focusFeature} onClose={() => setActiveSlug(null)} />}
       <noscript>
         <MapFallbackList data={data} cities={cities} />

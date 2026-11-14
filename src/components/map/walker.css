@@ -1,0 +1,29 @@
+/* 像素菠萝子(移植自 travel-timeline/src/styles/sprite.css 的 .pp-* 部分)。
+   雪碧图 512×480:4 列 × 128px,3 行 × 160px;行0 idle×2 / 行1 walk×4 / 行2 celebrate×2。
+   背景图 URL 不写在这里(要带 basePath),由 walkerMarker.ts 用 style.backgroundImage 设置。
+   Phase 3 换手绘版:保持同样的帧表布局,这个文件不用改。 */
+.pp-sprite {
+  width: 128px;
+  height: 160px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+.pp-idle { animation: pp-idle 0.9s steps(2) infinite; }
+@keyframes pp-idle { to { background-position-x: -256px; } }
+.pp-walk { background-position-y: -160px; animation: pp-walk 0.5s steps(4) infinite; }
+@keyframes pp-walk { to { background-position-x: -512px; } }
+.pp-celebrate { background-position-y: -320px; animation: pp-cel 0.5s steps(2) 3; }
+@keyframes pp-cel { to { background-position-x: -256px; } }
+
+/* 缩放/翻转挂在内层 sprite 上:MapLibre 会覆写 marker 根元素的 transform 来定位 */
+.pp-map { transform: scale(0.35); transform-origin: bottom center; }
+.pp-map.pp-flip { transform: scale(0.35) scaleX(-1); }
+
+/* 根元素(定位壳):不吃事件,点击穿透到地图 */
+.pp-wrap { pointer-events: none; }
+.pp-wrap.pp-hidden { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-sprite { animation: none !important; }
+}

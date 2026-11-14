@@ -14,7 +14,8 @@
     "coords:backfill": "node scripts/backfill-coords.mjs",
     "coords:check": "node scripts/backfill-coords.mjs --check",
     "maps": "node scripts/build-map-style.mjs",
-    "maps:worker": "node -e \"require('fs').copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs','public/maps/maplibre-gl-worker.js')\""
+    "maps:worker": "node -e \"require('fs').copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs','public/maps/maplibre-gl-worker.js')\"",
+    "map:assets": "node scripts/ingest-map-assets.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -33,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "playwright": "^1.60.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^2.1.9",

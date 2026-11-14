@@ -3,8 +3,13 @@ import type { LngLat } from '@/lib/places'
 
 export type WalkerAction = 'idle' | 'walk' | 'celebrate'
 
-/** 小人相对坐标点的屏幕偏移(像素):站在"门口右下",让白色店名标签与店面小插画保持可见 */
-export const WALKER_OFFSET: [number, number] = [22, 6]
+/**
+ * 小人相对坐标点的屏幕偏移(像素):站在"门口右下",让白色店名标签与店面小插画保持可见。
+ * 精灵盒 ≈ 45×56 px(0.35 缩放,脚在盒子底边中点),店名标签的主体在坐标点上方 8–36 px 处。
+ * 只往右挪盖不住标签(盒子会盖住短名字的末尾),所以主要往下挪:盒子顶边落在标签底边之下,
+ * 不论店名多长都不会挡住。计划原值 [22, 6] 在开发验收里仍会盖住 "Zareh" 的最后一个字母。
+ */
+export const WALKER_OFFSET: [number, number] = [22, 42]
 
 /**
  * 菠萝子 marker。

@@ -10,6 +10,7 @@ import { KIND_ORDER } from '@/lib/map/kinds'
 import { parseMapUrl, serializeMapUrl } from '@/lib/map/urlState'
 import { dirFromKeys, WALK_KEYS } from '@/lib/map/walker'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
+import type { LandmarkCollection } from '@/lib/map/landmarks'
 import type { LngLat, PlaceKind } from '@/lib/places'
 import type { MapApi } from './MapView'
 import CityChips from './CityChips'
@@ -31,7 +32,7 @@ const MapView = dynamic(() => import('./MapView'), {
 const isTypingTarget = (t: EventTarget | null) =>
   t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)
 
-export default function MapPageClient({ data, cities }: { data: PlaceCollection; cities: City[] }) {
+export default function MapPageClient({ data, landmarks, cities }: { data: PlaceCollection; landmarks: LandmarkCollection; cities: City[] }) {
   const { lang } = useLang()
   const ui = MAP_UI[lang]
   const [activeCity, setActiveCity] = useState<string | null>(null)
@@ -145,6 +146,8 @@ export default function MapPageClient({ data, cities }: { data: PlaceCollection;
         <MapView
           styleUrl={`${basePath}/maps/painted.json`}
           data={data}
+          landmarks={landmarks}
+          lang={lang}
           cities={cities}
           activeCity={activeCity}
           focusPlace={focusFeature}

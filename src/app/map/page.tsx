@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getAllPlaces } from '@/lib/places'
 import { placesToGeoJSON } from '@/lib/map/placesToGeoJSON'
+import { getAllLandmarks } from '@/lib/map/landmarks'
 import { CITIES } from '@/lib/map/cities'
 import MapPageClient from '@/components/map/MapPageClient'
 
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 }
 
 export default function MapPage() {
-  // 构建时执行:getAllPlaces 会对每个数据文件做 zod 校验,缺坐标直接让构建失败
+  // 构建时执行:getAllPlaces / getAllLandmarks 都做 zod 校验,数据不合法直接让构建失败
   const data = placesToGeoJSON(getAllPlaces())
-  return <MapPageClient data={data} cities={CITIES} />
+  const landmarks = getAllLandmarks()
+  return <MapPageClient data={data} landmarks={landmarks} cities={CITIES} />
 }

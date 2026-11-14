@@ -1,0 +1,8 @@
+[
+  { "name_zh": "弗林德斯街车站", "name_en": "Flinders Street Station", "coords": [144.9671, -37.8183], "icon": "lm-flinders", "minzoom": 12 },
+  { "name_zh": "墨尔本艺术中心", "name_en": "Arts Centre Melbourne", "coords": [144.9683, -37.8206], "icon": "lm-arts-centre", "minzoom": 13 },
+  { "name_zh": "墨尔本板球场", "name_en": "Melbourne Cricket Ground", "coords": [144.9834, -37.8200], "icon": "lm-mcg", "minzoom": 12 },
+  { "name_zh": "皇家展览馆", "name_en": "Royal Exhibition Building", "coords": [144.9717, -37.8047], "icon": "lm-exhibition", "minzoom": 13 },
+  { "name_zh": "战争纪念馆", "name_en": "Shrine of Remembrance", "coords": [144.9734, -37.8305], "icon": "lm-shrine", "minzoom": 13 },
+  { "name_zh": "月亮公园", "name_en": "Luna Park", "coords": [144.9767, -37.8678], "icon": "lm-luna-park", "minzoom": 13 }
+]

@@ -74,3 +74,30 @@ export function makeBadge(kind: PlaceKind): { image: ImageData; options: { pixel
   ctx.fillText(KIND_GLYPHS[kind], s / 2, s / 2 + 1)
   return { image: ctx.getImageData(0, 0, s * DPR, s * DPR), options: { pixelRatio: DPR } }
 }
+
+/** 地标占位(收件箱没有对应 lm-*.png 时用):奶油色圆底 + 深色五角星。Phase 3 资产到位后不再出现 */
+export function makeGenericLandmark(): { image: ImageData; options: { pixelRatio: number } } {
+  const s = 40
+  const c = document.createElement('canvas')
+  c.width = s * DPR
+  c.height = s * DPR
+  const ctx = c.getContext('2d')!
+  ctx.scale(DPR, DPR)
+  ctx.fillStyle = '#F8F2DD'
+  ctx.strokeStyle = '#3B392C'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.stroke()
+  ctx.fillStyle = '#3B392C'
+  ctx.beginPath()
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? 11 : 4.5
+    const a = -Math.PI / 2 + (i * Math.PI) / 5
+    ctx.lineTo(s / 2 + r * Math.cos(a), s / 2 + r * Math.sin(a))
+  }
+  ctx.closePath()
+  ctx.fill()
+  return { image: ctx.getImageData(0, 0, s * DPR, s * DPR), options: { pixelRatio: DPR } }
+}

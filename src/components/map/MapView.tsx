@@ -14,20 +14,26 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import './walker.css'
 import type { Point } from 'geojson'
 import { basePath } from '@/lib/basePath'
-import { makeBadge, makeLabelBackground } from './mapImages'
+import { makeBadge, makeGenericLandmark, makeLabelBackground } from './mapImages'
 import { WalkerController } from './walkerController'
 import { KIND_ORDER } from '@/lib/map/kinds'
 import { boundsOf, haversineMeters } from '@/lib/map/geo'
 import { inBounds, type City } from '@/lib/map/cities'
+import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSpriteUrl, type AssetManifest, type ImageSpec } from '@/lib/map/assets'
+import type { LandmarkCollection } from '@/lib/map/landmarks'
 import type { Vec } from '@/lib/map/walker'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
 import type { LngLat, PlaceKind } from '@/lib/places'
 
 export const SOURCE_ID = 'places'
+export const SOURCE_LANDMARKS = 'landmarks'
 export const LAYER_CLUSTER = 'place-cluster'
 export const LAYER_CLUSTER_COUNT = 'place-cluster-count'
+export const LAYER_STOREFRONT = 'place-storefront'
 export const LAYER_LABEL = 'place-label'
 export const LAYER_BADGE = 'place-badge'
+export const LAYER_LANDMARK = 'landmark'
+const GENERIC_LANDMARK = 'lm-generic'
 
 // MapLibre 的 padding 是持久的:每次镜头操作都显式给,卡片关闭时复位。
 // 注意 fitBounds 默认把 padding 叠加在地图"当前 padding"上且不持久化,所以 fitBounds 都要带 absolutePadding: true
@@ -54,7 +60,9 @@ type Props = {
   /** 已带 basePath 的样式 JSON 地址 */
   styleUrl: string
   data: PlaceCollection
+  landmarks: LandmarkCollection
   cities: City[]
+  lang: 'en' | 'zh'
   /** null = 总览(框住全部地点,小人隐藏) */
   activeCity: string | null
   /** 卡片打开的地点:镜头飞过去、高亮、小人站过去 */
@@ -76,8 +84,40 @@ type Props = {
   onFail: (err: unknown) => void
 }
 
+type LoadedImage = ImageSpec & { bitmap: ImageBitmap }
+
+/** 读资产清单;404 / 坏 JSON 都当空清单(全部回退占位) */
+async function fetchManifest(): Promise<AssetManifest> {
+  try {
+    const res = await fetch(`${basePath}/map-assets/manifest.json`)
+    if (!res.ok) return EMPTY_MANIFEST
+    return parseManifest(await res.json())
+  } catch {
+    return EMPTY_MANIFEST
+  }
+}
+
+/** 建图前把全部资产图片取成 ImageBitmap;单张失败只影响那一张(回退占位) */
+async function preloadImages(specs: ImageSpec[]): Promise<LoadedImage[]> {
+  const results = await Promise.all(
+    specs.map(async s => {
+      try {
+        const res = await fetch(s.url)
+        if (!res.ok) throw new Error(String(res.status))
+        return { ...s, bitmap: await createImageBitmap(await res.blob()) }
+      } catch (err) {
+        console.warn('[map] 资产加载失败,回退占位:', s.id, err)
+        return null
+      }
+    }),
+  )
+  return results.filter((r): r is LoadedImage => r !== null)
+}
+
+const landmarkTextField = (lang: 'en' | 'zh') => ['get', lang === 'en' ? 'name_en' : 'name_zh'] as ['get', string]
+
 export default function MapView(props: Props) {
-  const { styleUrl, data, cities, activeCity, focusPlace, walkTarget, kinds, reducedMotion, apiRef } = props
+  const { styleUrl, data, landmarks, cities, lang, activeCity, focusPlace, walkTarget, kinds, reducedMotion, apiRef } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const walkerRef = useRef<WalkerController | null>(null)
@@ -102,10 +142,24 @@ export default function MapView(props: Props) {
     ;(async () => {
       try {
         if (!('WebGL2RenderingContext' in window)) throw new Error('WebGL2 不可用')
-        const res = await fetch(styleUrl)
-        if (!res.ok) throw new Error(`样式加载失败 ${res.status} ${styleUrl}`)
-        const style = (await res.json()) as StyleSpecification
+        // 样式、资产清单、资产图片一起取:图片要在 style.load 时同步 addImage,首帧才有贴图(否则 fill-pattern 会闪空)
+        const [styleRes, manifest] = await Promise.all([fetch(styleUrl), fetchManifest()])
+        if (!styleRes.ok) throw new Error(`样式加载失败 ${styleRes.status} ${styleUrl}`)
+        const [style, images] = await Promise.all([
+          styleRes.json() as Promise<StyleSpecification>,
+          preloadImages(imageSpecs(manifest, basePath)),
+        ])
         if (cancelled) return
+        const loadedIds = new Set(images.map(i => i.id))
+        const landmarkData: LandmarkCollection = {
+          ...landmarks,
+          features: landmarks.features.map(f => ({
+            ...f,
+            properties: { ...f.properties, icon: loadedIds.has(f.properties.icon) ? f.properties.icon : GENERIC_LANDMARK },
+          })),
+        }
+        const shops = storefrontSlugs(manifest).filter(s => loadedIds.has(`shop-${s}`))
+
         // maplibre 6 的 ESM worker 靠 import.meta.url 定位,Turbopack 打包后找不到(404 → "Worker failed to load")。
         // 改用 public/maps/ 下的副本(npm run maps:worker 从 node_modules 同步;升级 maplibre-gl 后要重跑)
         setWorkerUrl(`${basePath}/maps/maplibre-gl-worker.js`)
@@ -125,15 +179,51 @@ export default function MapView(props: Props) {
           if (/webgl/i.test(String(e.error?.message ?? ''))) cbRef.current.onFail(e.error)
           else console.warn('[map]', e.error)
         })
+        // style.load 在首帧渲染前触发:此时注册贴图 / 图标,样式里的 fill-pattern 从第一帧起就能画
+        map.once('style.load', () => {
+          const m = mapRef.current
+          if (!m) return
+          for (const img of images) m.addImage(img.id, img.bitmap, { pixelRatio: img.pixelRatio })
+        })
         map.once('load', () => {
           const m = mapRef.current
           if (!m) return
           const lb = makeLabelBackground()
           m.addImage('label-bg', lb.image, lb.options)
+          // 徽章:收件箱有 PNG 就用 PNG(style.load 时已注册),没有就画布占位
           for (const k of KIND_ORDER) {
+            if (hasIcon(manifest, `badge-${k}`) && loadedIds.has(`badge-${k}`)) continue
             const b = makeBadge(k)
             m.addImage(`badge-${k}`, b.image, b.options)
           }
+          const gl = makeGenericLandmark()
+          m.addImage(GENERIC_LANDMARK, gl.image, gl.options)
+
+          // 地标图层先加:后加的 places 图层在碰撞时优先(店名永远不让位给地标)
+          m.addSource(SOURCE_LANDMARKS, { type: 'geojson', data: landmarkData })
+          m.addLayer({
+            id: LAYER_LANDMARK, type: 'symbol', source: SOURCE_LANDMARKS,
+            filter: ['>=', ['zoom'], ['get', 'minzoom']],
+            layout: {
+              'icon-image': ['get', 'icon'],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 12, 0.3, 15, 0.5, 17, 0.8],
+              'icon-anchor': 'bottom',
+              'icon-pitch-alignment': 'viewport',
+              'text-field': landmarkTextField(lang),
+              'text-font': ['Noto Sans Regular'],
+              'text-size': 11,
+              'text-anchor': 'top',
+              'text-offset': [0, 0.3],
+              'text-pitch-alignment': 'viewport',
+              'text-optional': true,
+            },
+            paint: {
+              'text-color': '#3B392C',
+              'text-halo-color': '#F8F2DD',
+              'text-halo-width': 1.5,
+            },
+          })
+
           m.addSource(SOURCE_ID, {
             type: 'geojson',
             data,
@@ -156,6 +246,21 @@ export default function MapView(props: Props) {
             layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Bold'], 'text-size': 13 },
             paint: { 'text-color': '#FFFFFF' },
           })
+          // 店面小插画:只给收件箱里有 shop-<slug>.png 的店,街道级才出现,压在标签下面
+          if (shops.length) {
+            m.addLayer({
+              id: LAYER_STOREFRONT, type: 'symbol', source: SOURCE_ID, minzoom: 15.5,
+              filter: ['all', ['!', ['has', 'point_count']], ['in', ['get', 'slug'], ['literal', shops]]],
+              layout: {
+                'icon-image': ['concat', 'shop-', ['get', 'slug']],
+                'icon-size': ['interpolate', ['linear'], ['zoom'], 15.5, 0.5, 17, 0.8, 18, 1],
+                'icon-anchor': 'bottom',
+                'icon-pitch-alignment': 'viewport',
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true,
+              },
+            })
+          }
           m.addLayer({
             id: LAYER_LABEL, type: 'symbol', source: SOURCE_ID, filter: ['!', ['has', 'point_count']],
             layout: {
@@ -197,8 +302,8 @@ export default function MapView(props: Props) {
             const f = e.features?.[0]
             if (f) cbRef.current.onPlaceClick(String(f.properties.slug))
           }
-          m.on('click', LAYER_LABEL, pick)
-          m.on('click', LAYER_BADGE, pick)
+          const clickable = [LAYER_LABEL, LAYER_BADGE, ...(shops.length ? [LAYER_STOREFRONT] : [])]
+          for (const id of clickable) m.on('click', id, pick)
           m.on('click', LAYER_CLUSTER, async e => {
             const f = e.features?.[0]
             if (!f) return
@@ -207,16 +312,16 @@ export default function MapView(props: Props) {
             m.easeTo({ center: (f.geometry as Point).coordinates as LngLat, zoom, padding: padRef.current })
           })
           m.on('click', e => {
-            const hits = m.queryRenderedFeatures(e.point, { layers: [LAYER_LABEL, LAYER_BADGE, LAYER_CLUSTER] })
+            const hits = m.queryRenderedFeatures(e.point, { layers: [...clickable, LAYER_CLUSTER] })
             if (hits.length === 0) cbRef.current.onMapClick()
           })
-          for (const id of [LAYER_LABEL, LAYER_BADGE, LAYER_CLUSTER]) {
+          for (const id of [...clickable, LAYER_CLUSTER]) {
             m.on('mouseenter', id, () => { m.getCanvas().style.cursor = 'pointer' })
             m.on('mouseleave', id, () => { m.getCanvas().style.cursor = '' })
           }
 
-          // 小人:事件全部转发到最新的回调;near 高亮直接改 feature-state
-          const walker = new WalkerController(m, `${basePath}/sprites/pineapple-classic.png`, reducedMotion, {
+          // 小人:事件全部转发到最新的回调;near 高亮直接改 feature-state。雪碧图:有手绘版用手绘版
+          const walker = new WalkerController(m, walkerSpriteUrl(manifest, basePath), reducedMotion, {
             onArrive: slug => cbRef.current.onArrive(slug),
             onLeave: slug => cbRef.current.onLeave(slug),
             onNear: slug => {
@@ -248,7 +353,7 @@ export default function MapView(props: Props) {
       mapRef.current = null
       map?.remove()
     }
-    // data 只在建图时用一次,后续通过 setData 更新;只有 styleUrl 变化才重建
+    // data / landmarks 只在建图时用一次,后续通过 setData 更新;只有 styleUrl 变化才重建
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [styleUrl])
 
@@ -338,6 +443,13 @@ export default function MapView(props: Props) {
         .map(f => ({ slug: f.properties.slug, coords: f.geometry.coordinates as LngLat })),
     )
   }, [kinds, data, cities, activeCity, ready])
+
+  // 6) 语言切换:地标名跟随(店名是品牌名,不翻译)
+  useEffect(() => {
+    const m = mapRef.current
+    if (!m || !ready || !m.getLayer(LAYER_LANDMARK)) return
+    m.setLayoutProperty(LAYER_LANDMARK, 'text-field', landmarkTextField(lang))
+  }, [lang, ready])
 
   // 外层负责铺满;maplibre-gl.css 里 `.maplibregl-map{position:relative}`(非 layer)会压过 Tailwind 的 `absolute`,
   // 所以容器本身用 h-full w-full,不依赖它的 position

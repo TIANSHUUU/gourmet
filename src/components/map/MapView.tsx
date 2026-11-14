@@ -206,7 +206,7 @@ export default function MapView(props: Props) {
             filter: ['>=', ['zoom'], ['get', 'minzoom']],
             layout: {
               'icon-image': ['get', 'icon'],
-              'icon-size': ['interpolate', ['linear'], ['zoom'], 12, 0.3, 15, 0.5, 17, 0.8],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 12, 0.45, 15, 0.7, 17, 1.0],
               'icon-anchor': 'bottom',
               'icon-pitch-alignment': 'viewport',
               'text-field': landmarkTextField(lang),

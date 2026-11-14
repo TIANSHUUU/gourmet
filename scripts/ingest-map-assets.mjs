@@ -22,6 +22,8 @@ const OUT_SPRITE = 'public/sprites/pineapple-painted.png'
 const OUT_MANIFEST = 'public/map-assets/manifest.json'
 const PREVIEW_DIR = path.join(INBOX, '_preview')
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 }
+// 调色板 PNG:riso 纸纹让真彩 PNG 单张 300–400 KB,量化到 256 色体积缩 4–5 倍,肉眼与数值(均差 ≈1/255)都看不出
+const PNG_OUT = { palette: true, quality: 90, effort: 10 }
 
 // ---------- 合成占位资产(只为验证管线) ----------
 // 确定性伪随机,保证每次生成一样
@@ -88,10 +90,10 @@ async function normalizeTo(src, asset, dest) {
   if (asset.kind === 'pattern') {
     const meta = await img.metadata()
     if (meta.width !== meta.height) console.warn(`⚠ ${path.basename(src)} 不是正方形(${meta.width}×${meta.height}),强行缩放会失真;贴图请用正方形`)
-    await img.resize(asset.size, asset.size, { fit: 'fill' }).png().toFile(dest)
+    await img.resize(asset.size, asset.size, { fit: 'fill' }).png(PNG_OUT).toFile(dest)
     return
   }
-  await img.resize(asset.size, asset.size, { fit: 'contain', background: TRANSPARENT }).png().toFile(dest)
+  await img.resize(asset.size, asset.size, { fit: 'contain', background: TRANSPARENT }).png(PNG_OUT).toFile(dest)
 }
 
 async function preview2x2(file, id) {

@@ -6,6 +6,13 @@
     "pat-wood"
   ],
   "icons": [
+    "badge-activity",
+    "badge-bar",
+    "badge-cafe",
+    "badge-food",
+    "badge-shop",
+    "badge-sight",
+    "badge-stay",
     "lm-arts-centre",
     "lm-exhibition",
     "lm-flinders",

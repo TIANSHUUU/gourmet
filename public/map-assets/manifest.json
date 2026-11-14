@@ -1,5 +1,17 @@
 {
-  "patterns": [],
-  "icons": [],
+  "patterns": [
+    "pat-grass",
+    "pat-sand",
+    "pat-water",
+    "pat-wood"
+  ],
+  "icons": [
+    "lm-arts-centre",
+    "lm-exhibition",
+    "lm-flinders",
+    "lm-luna-park",
+    "lm-mcg",
+    "lm-shrine"
+  ],
   "walker": null
 }

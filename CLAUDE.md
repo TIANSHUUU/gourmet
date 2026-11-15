@@ -34,6 +34,7 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 7. `src/data/map/cities.json` decides which city a place belongs to **by bounds**, not by its `city` string. A place outside every city makes `src/lib/map/cities.test.ts` fail — add a city entry (slug, names, bounds, default view) when that happens.
 
 ## Status
+- **Resuming as the commander/planner (any model): read `docs/superpowers/HANDOFF.md` first** — current state, next steps, how executor sessions are run and verified, known pitfalls. `docs/superpowers/codex-executor.md` covers running plans with Codex instead of a Claude session.
 - Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Collingwood/Melbourne)
 - `map_type` drives the map CTA in `RestaurantDetail.tsx`: `amap` → 「在高德地图查看 / Open in Amap」, anything else → Google Maps wording. Mainland China entries can now use `map_type: amap` with an `amap.com` / `uri.amap.com` link.
 - Source folders `cafe/` and `restaurant/`/`winebar/` at the gourmet root may have more unpublished entries — check before assuming all content is live.

@@ -1,6 +1,7 @@
 # 指挥官交接(菠萝子地图项目)
 
-> 给接手「指挥官」角色的新会话(任何模型)。上一任:Claude Fable 5.1,交接于 2026-11-15。
+> 给接手「指挥官」角色的新会话(任何模型:Opus / Sonnet / Codex 都行)。上一任:Claude Fable 5.1,最后更新 2026-11-15 晚。
+> 本文件是活文档:每次交接前,由当时的指挥官更新 §3 现状与 §4 队列。
 > 指挥官负责:和业主讨论 → 写 spec / 实施计划 → 起执行会话 → 核实报告 → 业主拍板后合并 push。
 > 执行者(Sonnet 会话或 Codex)只按计划动手、只 commit 不 push。
 
@@ -12,7 +13,7 @@
 | 2 | `web/CLAUDE.md` | 数据格式、basePath 坑、地图管线、测试/构建命令、分支规则(Claude Code 自动加载,但要通读) | 13 KB |
 | 3 | 本文件 | 当前状态与下一步 | |
 | 4 | `web/docs/superpowers/specs/2026-11-13-pineapple-map-design.md` | 地图总策划案。至少读:决策表、§6 架构、§6.8 Takeout、§7/§7.1 资产规格与提示词、§8 阶段划分 | 长,按需 |
-| 5 | `web/docs/superpowers/plans/2026-11-14-pineapple-map-phase4-takeout.md` | 正在进行的阶段;Task 5–6 还没做 | 长 |
+| 5 | `web/docs/superpowers/plans/2026-11-14-pineapple-map-phase4-takeout.md` | 只需读开头的状态行和 **Task 6**(成稿清单);其余 Task 已上线 | 只读 Task 6 |
 | 6 | 其他记忆文件 `feedback_*.md` | 用中文对话;双语评论语气轻松简洁;首页最新优先 | 很短 |
 
 其他阶段的计划(`plans/2026-11-1*-pineapple-map-phase0..3-*.md`)只在要改对应模块时再读。上一任会话的完整记录在
@@ -28,7 +29,7 @@
 
 ## 3. 当前状态(2026-11-15)
 
-**线上** `https://tianshuuu.github.io/gourmet/`,main = `38383f0`(2026-11-15 晚),Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章、手绘小人;Phase 4(Takeout 导入 + 全部地点详情页)已合并。
+**线上** `https://tianshuuu.github.io/gourmet/`:Phase 0–4 全部上线(最后一次功能合并 `38383f0`,2026-11-15),Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章、手绘小人;Takeout 导入脚本与全部地点详情页已在 main。站上内容仍只有 6 家吃喝,**还没有任何景点**。
 
 **分支**(`web/` 是 git 根目录):
 
@@ -40,16 +41,29 @@
 
 **美术收件箱** `/Users/tantianshu/Documents/code/gourmet/map/inbox/melbourne/`(不在 git 里):`pat-{grass,wood,water,sand}.png`、`lm-{flinders,arts-centre,mcg,exhibition,shrine,luna-park}.png`、`badge-*.png`(由 `npm run badges:render` 生成)、`_preview/`。淘汰的透明版贴图和早期 AI 味图鉴在 `map/inbox/_spare/melbourne/`。风格基准 = `lm-flinders.png`(扁平 riso 贴纸,奶油描边)。
 
-**执行会话**:Phase 4 的 Sonnet 会话 id `local_75b2d697-d1b2-45ba-8658-45456c8d8a18`(空闲,等 Takeout)。可以 `SendMessage` 续用,也可以起新会话。
+**执行会话**:没有在跑的。Phase 4 的 Sonnet 会话 `local_75b2d697-d1b2-45ba-8658-45456c8d8a18` 使命已完成,可归档;成稿批次请按 §5 B 起新会话。
 
 ## 4. 下一步队列(按优先级)
 
-1. **景点成稿(Phase 4 Task 6)**:Takeout 已导入(文件 `map/takeout/Maps (your places)/Reviews.json`,新格式 400 条;索引 `web/field-notes/takeout/INDEX.md`,墨尔本子集 `INDEX-vic.md`)。业主挑一批 → 开执行会话按 Phase 4 计划 Task 6 成稿到 `src/data/spots/`(美食/咖啡/酒吧类放 `restaurants/`),双语文案走 feedback 记忆的轻松简洁语气,不显示星级,照片 `photos:import`,城市边界外的点要加 `cities.json`(测试会提醒)。
+1. **景点成稿(Phase 4 Task 6)——当前卡在业主拍板**。Takeout 已导入:文件 `map/takeout/Maps (your places)/Reviews.json`(新格式,400 条;`map/Takeout/` 是同一份重复拷贝,可删),索引 `web/field-notes/takeout/INDEX.md`(394 草稿 / 6 已收录 / 8 缺坐标)和墨尔本子集 `INDEX-vic.md`(74 条),都在 gitignore 目录里,**丢了就重跑**:
+
+   ```bash
+   npm run -s takeout:import -- "/Users/tantianshu/Documents/code/gourmet/map/takeout/Maps (your places)/Reviews.json"
+   { sed -n '1,6p' field-notes/takeout/INDEX.md; grep '^| ' field-notes/takeout/INDEX.md | awk -F'|' 'NR>2 && $9 ~ /VIC/'; } > field-notes/takeout/INDEX-vic.md
+   ```
+
+   分布:日本 167、澳洲 83(VIC 73)、香港 45、泰国 43、印尼 13、越南 10、西班牙 6、乌兹别克 4、无国家码 29;正文 200 字以上 152 条。
+
+   **上一任已向业主提议的第一批(墨尔本 10 家,业主尚未回复)**:Suburbia Bakery by Seven Seeds(Fairfield,咖啡/烘焙)、Riché Cafe(Richmond,咖啡)、Wasshoi Bar and Grill(South Yarra,美食)、Liquid Room Urban Sanctuary(Sandringham,玩乐/浴场)、Tatin(Balwyn North,甜点)、Co Thu Quan(Richmond,越南菜)、Leena's Bar(Elsternwick,酒吧)、Brunetti Classico(Carlton,咖啡)、Madame Sourdough(Mont Albert North,烘焙)、Lune Croissanterie(Armadale)。备选 Crittenden Wines(Dromana,450 字)在墨尔本边界外,需在 `cities.json` 新增莫宁顿半岛,建议放第二批。**先问业主要不要换人、加人,定了再开执行会话**(简报模板见 §5 B)。
+
+   成稿规则全在 Phase 4 计划 Task 6:吃喝类放 `src/data/restaurants/`(food / cafe / bar),其余放 `src/data/spots/`(sight / activity / shop / stay);双语文案简洁轻快(feedback 记忆);不显示星级;照片业主放 `/Users/tantianshu/Documents/code/gourmet/spots/<slug>/imgs/` 后 `npm run photos:import -- <目录> <slug>`,没有照片就 `images: []`;城市边界外的点要加 `cities.json`(测试会报);一批统一提交、业主看过预览再合并。
 2. **小人手绘版**:已完成上线(`npm run walker:slice` + `map:assets`,见 CLAUDE.md Map 一节)。重画时同样流程。
 3. **美术待拍板**:z14+ 市中心 3D 建筑棕色太抢戏(`scripts/build-map-style.mjs` 的 `building` / `building3d`);配色 A/B;地标与店名的碰撞优先级(现在店名永远优先)。
 4. 其他城市(十和田、Mount Gambier)的地标与贴图铺开;「About Me」页(业主心愿);`gourmet/{restaurant,cafe,winebar}/` 里未发布的条目。
 
 ## 5. 执行会话简报模板
+
+**A. 执行一份实施计划**
 
 ```
 你在 /Users/tantianshu/Documents/code/gourmet/web(共用检出,不要新建 worktree)。
@@ -60,6 +74,18 @@
 报告里写:分支名、每个 Task 状态、与计划的偏离及原因、测试数量、截图路径,最后一句「等你看过预览,再合并到 main 并 push」。
 ```
 
+**B. 成稿一批景点(Phase 4 Task 6;把 <slug 列表> 换成业主定的)**
+
+```
+你在 /Users/tantianshu/Documents/code/gourmet/web(共用检出,不要新建 worktree)。
+先完整读 CLAUDE.md(尤其「Adding a new place」「Importing Google reviews」「Style」),再读 docs/superpowers/plans/2026-11-14-pineapple-map-phase4-takeout.md 的 Task 6。
+从 main 切出分支 feat/spots-batch-<N>。草稿在 field-notes/takeout/<slug>.md(gitignore,不要提交),按 Task 6 的 10 条清单逐个成稿:<slug 列表>。
+吃喝类放 src/data/restaurants/,其余放 src/data/spots/;双语正文以草稿的 ## takeout 为底,写得简洁、轻快、略带幽默,不逐字直译,不出现星级;照片目录不存在就 images: []。
+每条都要有 coords;落在现有城市边界外的,按 Task 6 Step 3 加 cities.json。
+一批做完统一一次 commit;不 push、不合并 main。跑 npm run lint && npm run test && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build。
+报告:每条的 slug / 分类 / 城市 / 双语 tagline,地图卡片与详情页截图路径,最后一句「等你看过文案和预览,再合并到 main 并 push」。
+```
+
 ## 6. 前几阶段踩过的坑(CLAUDE.md 里没写全的那部分)
 
 - 执行者会把计划里的假设当真:Phase 2 计划里 `fitBounds` padding、逐帧 `easeTo`、dwell 循环三处假设都错了,是执行者发现并修的。写计划时对 MapLibre 行为不确定的地方,要么先验证,要么在计划里标明"若 X 不成立则 Y"。
@@ -67,4 +93,5 @@
 - 内置浏览器面板被业主隐藏时 MapLibre 不出帧,截图是空底色;用 `javascript_tool` 调 `map.triggerRepaint(); map._render(performance.now())` 强制一帧再截。地图实例可以从 `.maplibregl-map` 元素的 React fiber 里找到(上一任用过)。
 - 自动权限模式下,Bash 命令带 `cd` 时偶尔被要求原样重发一次,照做即可。
 - 面板隐藏 / 使用上限:Sonnet 会话曾因 5 小时用量上限中途死掉,重开一个干净会话即可,分支上的提交不会丢。
+- 本地 dev 预览用 `preview_start` 的 `web-dev`(`.claude/launch.json`);页面是 `http://localhost:3000/gourmet/map?city=melbourne`。
 - 本地 dev 地图停在 zoom 3、样式永远 `isStyleLoaded() === false`,而线上同一提交正常:是 Turbopack 的 `.next` 缓存脏了(2026-11-15 一次合并时 package.json 带着冲突标记被编译过一次之后就这样)。停掉 dev 服务器、`rm -rf .next`、再起,立即恢复。先怀疑缓存,再怀疑代码。

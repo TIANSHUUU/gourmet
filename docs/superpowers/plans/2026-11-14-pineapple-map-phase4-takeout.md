@@ -8,6 +8,8 @@
 
 **Tech Stack:** 与前几阶段相同(sharp 已是 devDependency),无新依赖。
 
+**状态(2026-11-15):** Task 1–5、7 已完成并合并进 main(合并提交 `38383f0`);Task 6(成稿)等业主挑定批次,候选名单与执行简报见 `docs/superpowers/HANDOFF.md` §4–§5;Task 8 仍需业主点头。下面的复选框没有勾,以本行为准。
+
 **前置:** Phase 0–3 已合并上线。业主的 Takeout 导出可能还没做——本计划的 Task 1–4 不依赖它(用内联样例),Task 5 起需要真实文件。
 
 **设计文档:** `web/docs/superpowers/specs/2026-11-13-pineapple-map-design.md`(§6.8 内容管线、§8 Phase 4、附录 B 两代字段)

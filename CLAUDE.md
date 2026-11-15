@@ -38,6 +38,7 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 - `map_type` drives the map CTA in `RestaurantDetail.tsx`: `amap` → 「在高德地图查看 / Open in Amap」, anything else → Google Maps wording. Mainland China entries can now use `map_type: amap` with an `amap.com` / `uri.amap.com` link.
 - Source folders `cafe/` and `restaurant/`/`winebar/` at the gourmet root may have more unpublished entries — check before assuming all content is live.
 - 地图(2026-11):总策划案 `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`;Phase 0(数据)、Phase 1(`/map`)、Phase 2(小人)、Phase 3(资产管线·墨尔本试点)已完成,见下方「Map」一节;美术资产由业主生成后 `npm run map:assets` 接入;Phase 4(Takeout 导入景点)待做。
+- 执行者可换 Codex(ChatGPT Plus 自带,Claude 额度用完时):配置、沙箱注意事项与开工提示词见 `docs/superpowers/codex-executor.md`;`AGENTS.md` 已让 Codex 先读本文件。
 
 ## Map (`/map`)
 - Hand-painted-style real map (MapLibre GL 6 + OpenFreeMap vector tiles, free, no key). Design: `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`; plans: `docs/superpowers/plans/2026-11-13-pineapple-map-phase*.md`.

@@ -47,3 +47,6 @@ next-env.d.ts
 notes-app/.dev.vars
 notes-app/.wrangler/
 field-notes/*/photos/
+
+# Takeout 评论草稿(业主全量评论,公开仓库不放;真相源是业主自己的 Takeout 压缩包)
+field-notes/takeout/

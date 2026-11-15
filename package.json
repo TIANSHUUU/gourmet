@@ -17,7 +17,9 @@
     "maps:worker": "node -e \"require('fs').copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs','public/maps/maplibre-gl-worker.js')\"",
     "map:assets": "node scripts/ingest-map-assets.mjs",
     "badges:render": "node scripts/render-badges.mjs",
-    "walker:slice": "node scripts/slice-walker-sheet.mjs"
+    "walker:slice": "node scripts/slice-walker-sheet.mjs",
+    "takeout:import": "node scripts/import-takeout.mjs",
+    "photos:import": "node scripts/import-photos.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

@@ -19,7 +19,7 @@ import { WalkerController } from './walkerController'
 import { KIND_ORDER } from '@/lib/map/kinds'
 import { boundsOf, haversineMeters } from '@/lib/map/geo'
 import { inBounds, type City } from '@/lib/map/cities'
-import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSpriteUrl, type AssetManifest, type ImageSpec } from '@/lib/map/assets'
+import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSprite, type AssetManifest, type ImageSpec } from '@/lib/map/assets'
 import type { LandmarkCollection } from '@/lib/map/landmarks'
 import type { Vec } from '@/lib/map/walker'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
@@ -321,7 +321,7 @@ export default function MapView(props: Props) {
           }
 
           // 小人:事件全部转发到最新的回调;near 高亮直接改 feature-state。雪碧图:有手绘版用手绘版
-          const walker = new WalkerController(m, walkerSpriteUrl(manifest, basePath), reducedMotion, {
+          const walker = new WalkerController(m, walkerSprite(manifest, basePath), reducedMotion, {
             onArrive: slug => cbRef.current.onArrive(slug),
             onLeave: slug => cbRef.current.onLeave(slug),
             onNear: slug => {

@@ -26,12 +26,12 @@ export class WalkerMarker {
   private action: WalkerAction = 'idle'
   private facing: 1 | -1 = 1
 
-  constructor(spriteUrl: string) {
+  constructor(sprite: { url: string; pixelArt: boolean }) {
     this.wrap = document.createElement('div')
     this.wrap.className = 'pp-wrap pp-hidden'
     this.sprite = document.createElement('div')
-    this.sprite.className = 'pp-sprite pp-map pp-idle'
-    this.sprite.style.backgroundImage = `url(${spriteUrl})`
+    this.sprite.className = 'pp-sprite pp-map pp-idle' + (sprite.pixelArt ? ' pp-pixel' : '')
+    this.sprite.style.backgroundImage = `url(${sprite.url})`
     this.wrap.appendChild(this.sprite)
     this.marker = new Marker({
       element: this.wrap,

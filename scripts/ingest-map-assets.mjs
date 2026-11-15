@@ -115,7 +115,7 @@ async function buildSpriteSheet(poseFiles) {
     layers.push({ input: await frame.png().toBuffer(), left: f.x, top: f.y + f.dy })
   }
   await sharp({ create: { width: FRAME.w * FRAME.cols, height: FRAME.h * FRAME.rows, channels: 4, background: TRANSPARENT } })
-    .composite(layers).png().toFile(OUT_SPRITE)
+    .composite(layers).png(PNG_OUT).toFile(OUT_SPRITE)
 }
 
 async function main() {

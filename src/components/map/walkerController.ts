@@ -40,13 +40,13 @@ export class WalkerController {
 
   constructor(
     private readonly map: MapLibreMap,
-    spriteUrl: string,
+    sprite: { url: string; pixelArt: boolean },
     private readonly reducedMotion: boolean,
     private readonly events: WalkerEvents,
     /** 地图此刻"应有"的 padding(卡片开着 / 城市 / 总览)。MapLibre 的 padding 是持久的,控制器的镜头调用都要带上它 */
     private readonly getPadding: () => PaddingOptions,
   ) {
-    this.marker = new WalkerMarker(spriteUrl)
+    this.marker = new WalkerMarker(sprite)
     const c = map.getCenter()
     this.marker.setLngLat([c.lng, c.lat]) // addTo 之前必须有坐标
     this.marker.addTo(map)

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSpriteUrl } from './assets'
+import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSprite, walkerSpriteUrl } from './assets'
 
 const full = { patterns: ['pat-wood'], icons: ['badge-food', 'lm-mcg', 'shop-zareh'], walker: 'pineapple-painted' as const }
 
@@ -36,6 +36,8 @@ describe('walkerSpriteUrl / hasIcon / storefrontSlugs', () => {
   it('picks the painted sheet only when the manifest has it', () => {
     expect(walkerSpriteUrl(full, '/gourmet')).toBe('/gourmet/sprites/pineapple-painted.png')
     expect(walkerSpriteUrl(EMPTY_MANIFEST, '')).toBe('/sprites/pineapple-classic.png')
+    expect(walkerSprite(full, '/gourmet')).toEqual({ url: '/gourmet/sprites/pineapple-painted.png', pixelArt: false })
+    expect(walkerSprite(EMPTY_MANIFEST, '')).toEqual({ url: '/sprites/pineapple-classic.png', pixelArt: true })
   })
   it('hasIcon checks the icons list', () => {
     expect(hasIcon(full, 'badge-food')).toBe(true)

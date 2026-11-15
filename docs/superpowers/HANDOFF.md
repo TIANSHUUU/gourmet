@@ -28,15 +28,15 @@
 
 ## 3. 当前状态(2026-11-15)
 
-**线上** `https://tianshuuu.github.io/gourmet/`,main = `c429f76`,Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章;小人仍是像素版。
+**线上** `https://tianshuuu.github.io/gourmet/`,main = `38383f0`(2026-11-15 晚),Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章、手绘小人;Phase 4(Takeout 导入 + 全部地点详情页)已合并。
 
 **分支**(`web/` 是 git 根目录):
 
 | 分支 | 状态 | 说明 |
 |---|---|---|
 | `main` | 已 push | |
-| `feat/map-phase4` | 5 个提交未合并,**检出当前停在这里** | Task 1–4、7 已完成(Takeout 解析 + 导入脚本 + 照片导入 + 全部地点详情页 + 文档);Task 5–6 等业主的 `Reviews.json`;Task 8 文案改动需业主批准。合并时 `package.json` scripts 在 `map:assets` 后两边各加了一行,会有一处一行冲突 |
-| `feat/map-phase1/2/3`、`feat/map-art-melbourne`、`feat/map-badges` | 已合并进 main | 可删 |
+| `feat/map-phase4` | 已合并(`38383f0`) | Task 5 已跑:`npm run takeout:import` 导入 400 条 → `field-notes/takeout/INDEX.md` + `INDEX-vic.md`(gitignore);Task 6(按业主挑的批次成稿到 `src/data/spots/`)待做;Task 8 文案改动需业主批准 |
+| `feat/map-phase1/2/3`、`feat/map-art-melbourne`、`feat/map-badges`、`feat/map-walker-art` | 已合并进 main | 可删;**检出当前停在 main** |
 
 **美术收件箱** `/Users/tantianshu/Documents/code/gourmet/map/inbox/melbourne/`(不在 git 里):`pat-{grass,wood,water,sand}.png`、`lm-{flinders,arts-centre,mcg,exhibition,shrine,luna-park}.png`、`badge-*.png`(由 `npm run badges:render` 生成)、`_preview/`。淘汰的透明版贴图和早期 AI 味图鉴在 `map/inbox/_spare/melbourne/`。风格基准 = `lm-flinders.png`(扁平 riso 贴纸,奶油描边)。
 
@@ -44,8 +44,8 @@
 
 ## 4. 下一步队列(按优先级)
 
-1. **Takeout**:业主在 Takeout 列表里找不到「Maps (your places)」(官方文档仍说评论在这个产品下;原因未查明)。等业主截图「Maps」的完整选项列表再判断;退路是用内置浏览器登录 Google Maps「你的贡献 → 评价」抓取后转成导入脚本认的格式。文件到位后放 `/Users/tantianshu/Documents/code/gourmet/map/takeout/Reviews.json` → 合并 Phase 4 → 跑 `npm run takeout:import` → 把 `field-notes/takeout/INDEX.md` 交业主挑 → 执行者成稿到 `src/data/spots/`。
-2. **小人手绘版**:业主会出一张横向四连格 `pp-sheet.png`(idle / walk-a / walk-b / cheer,同比例同基线)。指挥官用 sharp 按等宽切成四张**同高**的 `pp-{idle,walk-a,walk-b,cheer}.png` 放进收件箱(保持同高才能比例一致),`npm run map:assets` 会自动拼雪碧图,地图上显示约 45×56 px,截图给业主看。
+1. **景点成稿(Phase 4 Task 6)**:Takeout 已导入(文件 `map/takeout/Maps (your places)/Reviews.json`,新格式 400 条;索引 `web/field-notes/takeout/INDEX.md`,墨尔本子集 `INDEX-vic.md`)。业主挑一批 → 开执行会话按 Phase 4 计划 Task 6 成稿到 `src/data/spots/`(美食/咖啡/酒吧类放 `restaurants/`),双语文案走 feedback 记忆的轻松简洁语气,不显示星级,照片 `photos:import`,城市边界外的点要加 `cities.json`(测试会提醒)。
+2. **小人手绘版**:已完成上线(`npm run walker:slice` + `map:assets`,见 CLAUDE.md Map 一节)。重画时同样流程。
 3. **美术待拍板**:z14+ 市中心 3D 建筑棕色太抢戏(`scripts/build-map-style.mjs` 的 `building` / `building3d`);配色 A/B;地标与店名的碰撞优先级(现在店名永远优先)。
 4. 其他城市(十和田、Mount Gambier)的地标与贴图铺开;「About Me」页(业主心愿);`gourmet/{restaurant,cafe,winebar}/` 里未发布的条目。
 
@@ -67,3 +67,4 @@
 - 内置浏览器面板被业主隐藏时 MapLibre 不出帧,截图是空底色;用 `javascript_tool` 调 `map.triggerRepaint(); map._render(performance.now())` 强制一帧再截。地图实例可以从 `.maplibregl-map` 元素的 React fiber 里找到(上一任用过)。
 - 自动权限模式下,Bash 命令带 `cd` 时偶尔被要求原样重发一次,照做即可。
 - 面板隐藏 / 使用上限:Sonnet 会话曾因 5 小时用量上限中途死掉,重开一个干净会话即可,分支上的提交不会丢。
+- 本地 dev 地图停在 zoom 3、样式永远 `isStyleLoaded() === false`,而线上同一提交正常:是 Turbopack 的 `.next` 缓存脏了(2026-11-15 一次合并时 package.json 带着冲突标记被编译过一次之后就这样)。停掉 dev 服务器、`rm -rf .next`、再起,立即恢复。先怀疑缓存,再怀疑代码。

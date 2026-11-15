@@ -39,6 +39,11 @@ export function walkerSpriteUrl(m: AssetManifest, basePath: string): string {
   return `${basePath}/sprites/${m.walker ?? 'pineapple-classic'}.png`
 }
 
+/** 小人雪碧图:有手绘版用手绘版;只有像素版需要 image-rendering: pixelated(走 .pp-pixel) */
+export function walkerSprite(m: AssetManifest, basePath: string): { url: string; pixelArt: boolean } {
+  return { url: walkerSpriteUrl(m, basePath), pixelArt: m.walker === null }
+}
+
 export function hasIcon(m: AssetManifest, id: string): boolean {
   return m.icons.includes(id)
 }

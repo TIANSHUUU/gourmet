@@ -614,3 +614,127 @@ git commit -m "Docs: Bakeries category, two new cities, batch-2 places"
 - 重跑 lint / test / build;`git log main..feat/content-batch-2` + 读 diff。
 - 文案逐句对照草稿:有没有多出来的话、有没有改写业主原话。
 - 预览:首页(新顺序:Crittenden 成头条;分类栏多了「烘焙」,点它只剩 4 家)、`/map` 分类 chips 有「烘焙」且徽章是可颂、城市 chips 多了莫宁顿半岛和金泽、两座新城的镜头、5 个详情页(手机)。
+
+---
+
+## 追加(业主看过预览后,2026-11-16)
+
+业主两条新要求:(1) 首页「咖啡」现在是空的,补一家墨尔本咖啡店 **Aunty Peg's**(照片已放好);(2) 原图库里放在 `gourmet/cafe/` 下的三家烘焙,挪到新目录 `gourmet/bakery/` 单独存放。两件事都在**同一分支** `feat/content-batch-2` 上做。
+
+### Task 6: 原图库新增 `bakery/` 目录
+
+原图库 `/Users/tantianshu/Documents/code/gourmet/` 不在 git 里(git 根是 `web/`),只是业主的原始笔记和照片存放处;本 Task 只有文档改动进 git。
+
+**Files:**
+- 移动(git 之外):`/Users/tantianshu/Documents/code/gourmet/cafe/{madame-sourdough,suburbia-bakery,tatin-bakery}` → `/Users/tantianshu/Documents/code/gourmet/bakery/`
+- Modify: `CLAUDE.md`(两处路径)
+
+- [ ] **Step 1: 移动三个目录**
+
+```bash
+cd /Users/tantianshu/Documents/code/gourmet
+mkdir bakery
+mv cafe/madame-sourdough cafe/suburbia-bakery cafe/tatin-bakery bakery/
+ls cafe bakery
+```
+
+Expected:`cafe:` 下只剩 `aunty-pegs`;`bakery:` 下是 `madame-sourdough  suburbia-bakery  tatin-bakery`。(`restaurant/Soma_Pastry` 业主没让动,不要动。)
+
+- [ ] **Step 2: 文档里的原图库路径**
+
+回到 `web/`。`CLAUDE.md` 里
+
+```
+Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,winebar}/<name>/`
+```
+
+替换为
+
+```
+Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,bakery,winebar}/<name>/`
+```
+
+以及
+
+```
+put the originals in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,winebar,spots}/<name>/imgs/`
+```
+
+替换为
+
+```
+put the originals in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,bakery,winebar,spots}/<name>/imgs/` (folder = the place's category: `bakery/` holds suburbia-bakery, tatin-bakery, madame-sourdough since 2026-11-16)
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add CLAUDE.md
+git commit -m "Docs: originals for bakeries now live in gourmet/bakery/"
+```
+
+### Task 7: 成稿 Aunty Peg's
+
+**已定的编辑决定(照抄):** slug `aunty-pegs`;`category: cafe`(Proud Mary 的咖啡烘豆店);Collingwood / Melbourne;类型标签 `Coffee roastery` / `咖啡烘豆坊`(中文刻意不用「烘焙」,免得和新分类「烘焙」混);`visited: "2026-06-14"`(评论日期,首页会排在 Mary's 之前);`map_url` 带店名 + 保留 ftid,撇号写成 `%27`,指挥官已在浏览器里点开验证,坐标与草稿一致。照片 3 张,第一张(吧台)做封面。
+
+**Files:**
+- Create: `src/data/restaurants/aunty-pegs.md`
+- Create(脚本生成): `public/images/aunty-pegs/1.jpg`…`3.jpg`
+- 读(不改、不提交):`field-notes/takeout/aunty-peg-s.md`
+
+- [ ] **Step 1: 导入照片**
+
+```bash
+cd /Users/tantianshu/Documents/code/gourmet/web
+npm run -s photos:import -- /Users/tantianshu/Documents/code/gourmet/cafe/aunty-pegs/imgs aunty-pegs
+```
+
+Expected:3 行 `… (1062×1416, … KB)`,末尾 `images:` 片段是 `"1.jpg" "2.jpg" "3.jpg"`。
+
+- [ ] **Step 2: 建文件 `src/data/restaurants/aunty-pegs.md`**
+
+```markdown
+---
+slug: aunty-pegs
+name: "Aunty Peg's"
+suburb: "Collingwood"
+city: "Melbourne"
+category: cafe
+cuisine_en: "Coffee roastery"
+cuisine_zh: "咖啡烘豆坊"
+map_url: "https://www.google.com/maps/place/Aunty+Peg%27s/data=!4m2!3m1!1s0x0:0xc128396c750f78ec"
+coords: [144.987005, -37.802809]
+map_type: google
+visited: "2026-06-14"
+tagline_en: "<你写>"
+tagline_zh: "<你写>"
+images:
+  - "1.jpg"
+  - "2.jpg"
+  - "3.jpg"
+---
+
+## en
+
+<你写>
+
+## zh
+
+<你写>
+```
+
+- [ ] **Step 3: 正文与 tagline**
+
+规则与 Task 4 Step 3 完全相同:原文是英文 → `## en` = 业主原文,只修明显笔误与语法(如 `shop/ roastery` 的空格),不改写、不加句子;`## zh` = 逐句忠实翻译,自然口语化,不增不减;`cupping` 可译「杯测」;`Proud Mary` 保留英文。tagline 只用评论里的事实,`tagline_en` ≤ 12 词、`tagline_zh` ≤ 22 字。写完 `grep -n '<你写>' src/data/restaurants/aunty-pegs.md` 无输出。
+
+- [ ] **Step 4: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;**170 passed**;构建成功;`ls out | grep -c '^aunty-pegs\.html$'` 输出 `1`。
+
+- [ ] **Step 5: Commit(连同本计划文件的这段追加)**
+
+```bash
+git add src/data/restaurants/aunty-pegs.md public/images/aunty-pegs docs/superpowers/plans/2026-11-16-content-batch-2.md
+git commit -m "Add Aunty Peg's (Collingwood coffee roastery) from Google Takeout"
+```

@@ -39,9 +39,23 @@ export function walkerSpriteUrl(m: AssetManifest, basePath: string): string {
   return `${basePath}/sprites/${m.walker ?? 'pineapple-classic'}.png`
 }
 
-/** 小人雪碧图:有手绘版用手绘版;只有像素版需要 image-rendering: pixelated(走 .pp-pixel) */
-export function walkerSprite(m: AssetManifest, basePath: string): { url: string; pixelArt: boolean } {
-  return { url: walkerSpriteUrl(m, basePath), pixelArt: m.walker === null }
+/** 小人雪碧图描述:地址、是否像素风(像素版要 .pp-pixel 硬边)、原画脸是否朝左(决定何时镜像) */
+export type WalkerSprite = { url: string; pixelArt: boolean; facesLeft: boolean }
+
+/**
+ * 手绘小人原画的朝向。2026-11-15 的四连格是脸朝左的四分之三侧脸(墨镜偏画面左侧)。
+ * 业主重画后若改成脸朝右,把它改成 false。像素版是对称正脸,一律按朝右处理。
+ */
+export const PAINTED_WALKER_FACES_LEFT = true
+
+/** 小人雪碧图:有手绘版用手绘版 */
+export function walkerSprite(m: AssetManifest, basePath: string): WalkerSprite {
+  const painted = m.walker !== null
+  return {
+    url: walkerSpriteUrl(m, basePath),
+    pixelArt: !painted,
+    facesLeft: painted && PAINTED_WALKER_FACES_LEFT,
+  }
 }
 
 export function hasIcon(m: AssetManifest, id: string): boolean {

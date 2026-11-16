@@ -404,3 +404,134 @@ git commit -m "Docs: no-photo cover fallback, Suburbia Bakery added"
 - 自己重跑 `npm run lint`、`npm run test`、`NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`;`git log main..feat/takeout-trial-suburbia` + 读 diff。
 - `preview_start web-dev`,截:首页卡片(桌面,中英各看一眼)、`/gourmet/suburbia-bakery` 详情页(手机 375)、`/gourmet/map?city=melbourne&place=suburbia-bakery` 地图卡片;`SendUserFile` 发业主。
 - 文案对照草稿逐条核事实与语气。
+
+---
+
+## 追加(指挥官预览后,2026-11-16)
+
+### Task 4: 无封面卡片的关闭钮避让 + 详情页正文分段
+
+预览发现两处只在 Takeout 条目上出现的问题:(1) 地图 `PlaceCard` 没有封面时,右上角 × 按钮压在长店名上(「Suburbia Bakery by Seven Seeds」的 "Seven" 被盖住);(2) 详情页正文只有一个 `<p>`,`## en` / `## zh` 里用空行分的段落被挤成一段。
+
+**Files:**
+- Modify: `src/lib/format.ts`(末尾追加 `splitParagraphs`)
+- Test: `src/lib/format.test.ts`(末尾追加一个 describe)
+- Modify: `src/components/RestaurantDetail.tsx`(正文那一行 + import)
+- Modify: `src/components/map/PlaceCard.tsx`(`<h2>` 那一行)
+
+- [ ] **Step 1: 写失败的测试**
+
+`src/lib/format.test.ts` 第 2 行的 import 改为:
+
+```ts
+import { formatVisited, splitParagraphs } from './format'
+```
+
+文件末尾追加:
+
+```ts
+describe('splitParagraphs', () => {
+  it('splits on blank lines and trims each paragraph', () => {
+    expect(splitParagraphs('First para.\n\n  Second para.  \n\n\nThird.')).toEqual([
+      'First para.',
+      'Second para.',
+      'Third.',
+    ])
+  })
+
+  it('keeps a single paragraph (including soft line breaks) as one item, and drops empty input', () => {
+    expect(splitParagraphs('One line\nstill the same para')).toEqual(['One line\nstill the same para'])
+    expect(splitParagraphs('   ')).toEqual([])
+  })
+})
+```
+
+- [ ] **Step 2: 跑测试确认失败**
+
+Run: `npx vitest run src/lib/format.test.ts`
+Expected: FAIL(`splitParagraphs` is not a function / 不是导出成员)。
+
+- [ ] **Step 3: 实现**
+
+`src/lib/format.ts` 末尾追加:
+
+```ts
+/** 评论正文按空行分段(Takeout 原评论常有多段);段内单个换行保留,由 HTML 折叠成空格 */
+export function splitParagraphs(text: string): string[] {
+  return (text ?? '')
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(p => p !== '')
+}
+```
+
+- [ ] **Step 4: 跑测试确认通过**
+
+Run: `npx vitest run src/lib/format.test.ts`
+Expected: PASS。
+
+- [ ] **Step 5: 详情页按段渲染**
+
+`src/components/RestaurantDetail.tsx`:
+
+import 那行
+
+```tsx
+import { formatVisited } from '@/lib/format'
+```
+
+改为
+
+```tsx
+import { formatVisited, splitParagraphs } from '@/lib/format'
+```
+
+正文那一行
+
+```tsx
+      <p className="text-[#13314A] text-lg leading-relaxed mb-12">{review}</p>
+```
+
+改为
+
+```tsx
+      <div className="text-[#13314A] text-lg leading-relaxed mb-12 space-y-4">
+        {splitParagraphs(review).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+```
+
+- [ ] **Step 6: 地图卡片标题避让关闭钮**
+
+`src/components/map/PlaceCard.tsx` 里
+
+```tsx
+          <h2 className="font-display text-2xl font-bold">{p.name}</h2>
+```
+
+改为(没有封面时 × 按钮落在标题行上,给标题右侧留 2.5rem)
+
+```tsx
+          <h2 className={`font-display text-2xl font-bold ${p.cover ? '' : 'pr-10'}`}>{p.name}</h2>
+```
+
+- [ ] **Step 7: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;测试 **165 passed**(163 + 2);构建成功。
+
+再确认详情页静态产物里两段是分开的 `<p>`:
+
+```bash
+grep -o '<p>Cosy, friendly' out/suburbia-bakery.html
+```
+
+Expected: 打印 `<p>Cosy, friendly`(第二段自成一个 `<p>`)。
+
+- [ ] **Step 8: Commit(连同本计划文件的这段追加)**
+
+```bash
+git add src/lib/format.ts src/lib/format.test.ts src/components/RestaurantDetail.tsx src/components/map/PlaceCard.tsx docs/superpowers/plans/2026-11-16-takeout-trial-suburbia.md
+git commit -m "Detail page: render review paragraphs; map card: keep long names clear of the close button"
+```

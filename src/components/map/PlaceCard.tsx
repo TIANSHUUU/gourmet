@@ -40,7 +40,7 @@ export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature;
       </button>
       <div className="p-4 flex flex-col gap-2 overflow-y-auto">
         <div className="flex items-center gap-2 flex-wrap">
-          <h2 className="font-display text-2xl font-bold">{p.name}</h2>
+          <h2 className={`font-display text-2xl font-bold ${p.cover ? '' : 'pr-10'}`}>{p.name}</h2>
           <span
             className="font-label text-[10px] uppercase tracking-widest text-white px-2 py-0.5 rounded-full"
             style={{ background: KIND_COLORS[p.kind] }}

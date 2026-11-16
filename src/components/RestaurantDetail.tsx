@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useLang } from './LanguageContext'
 import type { Place } from '@/lib/places'
 import { basePath } from '@/lib/basePath'
-import { formatVisited } from '@/lib/format'
+import { formatVisited, splitParagraphs } from '@/lib/format'
 import { MAP_UI } from '@/lib/mapI18n'
 import Lightbox from './Lightbox'
 
@@ -53,7 +53,11 @@ export default function RestaurantDetail({ restaurant }: { restaurant: Place }) 
       )}
       <p className="font-label text-[11px] uppercase tracking-wider text-[#8A99A6] mb-8">{locationLabel}</p>
 
-      <p className="text-[#13314A] text-lg leading-relaxed mb-12">{review}</p>
+      <div className="text-[#13314A] text-lg leading-relaxed mb-12 space-y-4">
+        {splitParagraphs(review).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
 
       {srcs.length > 1 && (
         <div className="columns-1 sm:columns-2 gap-3 mb-12">

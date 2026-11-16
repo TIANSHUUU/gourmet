@@ -1,5 +1,7 @@
 import { Marker, type Map as MapLibreMap } from 'maplibre-gl'
 import type { LngLat } from '@/lib/places'
+import type { WalkerSprite } from '@/lib/map/assets'
+import { spriteFlipped } from '@/lib/map/walker'
 
 export type WalkerAction = 'idle' | 'walk' | 'celebrate'
 
@@ -18,20 +20,24 @@ export const WALKER_OFFSET: [number, number] = [22, 42]
  * 根元素布局尺寸是 128×160(transform 不改布局),anchor: 'bottom' 对齐的是这个盒子的底边中点;
  * 内层 transform-origin: bottom center,所以缩小后脚仍踩在坐标点上。
  * offset 只影响屏幕位置,getLngLat() 仍是坐标点本身,所以邻近判定不受影响。
+ * 朝向:facing 是行进方向(1 = 往右);要不要加 .pp-flip 镜像由 spriteFlipped() 按原画朝向决定。
  */
 export class WalkerMarker {
   readonly marker: Marker
   private readonly wrap: HTMLDivElement
   private readonly sprite: HTMLDivElement
+  private readonly artFacesLeft: boolean
   private action: WalkerAction = 'idle'
   private facing: 1 | -1 = 1
 
-  constructor(sprite: { url: string; pixelArt: boolean }) {
+  constructor(sprite: WalkerSprite) {
+    this.artFacesLeft = sprite.facesLeft
     this.wrap = document.createElement('div')
     this.wrap.className = 'pp-wrap pp-hidden'
     this.sprite = document.createElement('div')
     this.sprite.className = 'pp-sprite pp-map pp-idle' + (sprite.pixelArt ? ' pp-pixel' : '')
     this.sprite.style.backgroundImage = `url(${sprite.url})`
+    this.applyFacing() // 初始朝向(往右)也要按原画朝向设好,否则第一次往右走时 setFacing 会因"没变化"直接返回
     this.wrap.appendChild(this.sprite)
     this.marker = new Marker({
       element: this.wrap,
@@ -82,6 +88,10 @@ export class WalkerMarker {
   setFacing(f: 1 | -1): void {
     if (f === this.facing) return
     this.facing = f
-    this.sprite.classList.toggle('pp-flip', f === -1)
+    this.applyFacing()
+  }
+
+  private applyFacing(): void {
+    this.sprite.classList.toggle('pp-flip', spriteFlipped(this.facing, this.artFacesLeft))
   }
 }

@@ -5,6 +5,7 @@ import {
   autoWalkDuration, facingFromDx, isZero, movePoint, proximityStep,
   FREE_WALK_MIN_ZOOM, NEAR_IDLE, ZERO, type NearState, type PlacePoint, type Vec,
 } from '@/lib/map/walker'
+import type { WalkerSprite } from '@/lib/map/assets'
 import { WalkerMarker } from './walkerMarker'
 
 export type WalkerEvents = {
@@ -40,7 +41,7 @@ export class WalkerController {
 
   constructor(
     private readonly map: MapLibreMap,
-    sprite: { url: string; pixelArt: boolean },
+    sprite: WalkerSprite,
     private readonly reducedMotion: boolean,
     private readonly events: WalkerEvents,
     /** 地图此刻"应有"的 padding(卡片开着 / 城市 / 总览)。MapLibre 的 padding 是持久的,控制器的镜头调用都要带上它 */

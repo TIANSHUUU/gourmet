@@ -12,7 +12,10 @@ map_type: google
 visited: "2026-07-11"
 tagline_en: "Miso rye, pandan danish, and a baguette that's anything but plain."
 tagline_zh: "味噌黑麦、斑斓丹麦，再来根绝不平淡的法棍。"
-images: []
+images:
+  - "1.jpg"
+  - "2.jpg"
+  - "3.jpg"
 ---
 
 ## en

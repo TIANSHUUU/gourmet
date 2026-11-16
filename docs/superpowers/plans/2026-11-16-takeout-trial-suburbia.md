@@ -651,3 +651,65 @@ Expected: lint 无报错;测试 **166 passed**(165 + 1);构建成功。
 git add src/data/restaurants/suburbia-bakery.md scripts/lib/photos.mjs scripts/lib/photos.test.mjs scripts/import-photos.mjs docs/superpowers/plans/2026-11-16-takeout-trial-suburbia.md
 git commit -m "Suburbia: review text faithful to the original; photos:import accepts webp"
 ```
+
+### Task 6: 导入业主的三张照片
+
+业主从 Google 地图评价页下载了 3 张 webp,放在 `/Users/tantianshu/Documents/code/gourmet/cafe/suburbia-bakery/imgs/`:`1.webp`(Daily Bake 面包墙,做封面)、`2.webp`(椰子斑斓丹麦)、`3.webp`(咖啡品鉴海报),都是 1062×1416 竖图。顺序就是业主命名的顺序。脚本 `withoutEnlargement`,所以导出保持 1062×1416,不放大。
+
+**Files:**
+- Create: `public/images/suburbia-bakery/1.jpg`、`2.jpg`、`3.jpg`(脚本生成)
+- Modify: `src/data/restaurants/suburbia-bakery.md`(只改 `images:` 一行)
+- **不要动** `CLAUDE.md`、`docs/superpowers/HANDOFF.md`(指挥官未提交的改动)。
+
+- [ ] **Step 1: 导入**
+
+```bash
+cd /Users/tantianshu/Documents/code/gourmet/web
+npm run -s photos:import -- /Users/tantianshu/Documents/code/gourmet/cafe/suburbia-bakery/imgs suburbia-bakery
+```
+
+Expected:三行 `1.webp → public/images/suburbia-bakery/1.jpg (1062×1416, … KB)`(2、3 同理),末尾
+
+```
+images:
+  - "1.jpg"
+  - "2.jpg"
+  - "3.jpg"
+```
+
+- [ ] **Step 2: 写进 frontmatter**
+
+`src/data/restaurants/suburbia-bakery.md` 里
+
+```yaml
+images: []
+```
+
+改为
+
+```yaml
+images:
+  - "1.jpg"
+  - "2.jpg"
+  - "3.jpg"
+```
+
+- [ ] **Step 3: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;**166 passed**;构建成功。
+
+```bash
+grep -o 'images/suburbia-bakery/1.jpg' out/index.html | head -1
+grep -c 'badge-cafe.png' out/index.html
+ls -la out/images/suburbia-bakery/
+```
+
+Expected: 第一条打印 `images/suburbia-bakery/1.jpg`;第二条 `0`(首页已没有无图的咖啡馆);第三条列出 3 个 jpg。
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add public/images/suburbia-bakery src/data/restaurants/suburbia-bakery.md docs/superpowers/plans/2026-11-16-takeout-trial-suburbia.md
+git commit -m "Suburbia Bakery: add the owner's three photos"
+```

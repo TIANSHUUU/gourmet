@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatVisited } from './format'
+import { formatVisited, splitParagraphs } from './format'
 
 describe('formatVisited', () => {
   it('formats English month + year', () => {
@@ -17,5 +17,20 @@ describe('formatVisited', () => {
     expect(formatVisited('', 'en')).toBe('')
     expect(formatVisited('2026', 'en')).toBe('')
     expect(formatVisited('2026-13', 'en')).toBe('')
+  })
+})
+
+describe('splitParagraphs', () => {
+  it('splits on blank lines and trims each paragraph', () => {
+    expect(splitParagraphs('First para.\n\n  Second para.  \n\n\nThird.')).toEqual([
+      'First para.',
+      'Second para.',
+      'Third.',
+    ])
+  })
+
+  it('keeps a single paragraph (including soft line breaks) as one item, and drops empty input', () => {
+    expect(splitParagraphs('One line\nstill the same para')).toEqual(['One line\nstill the same para'])
+    expect(splitParagraphs('   ')).toEqual([])
   })
 })

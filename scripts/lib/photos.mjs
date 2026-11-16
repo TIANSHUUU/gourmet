@@ -1,5 +1,5 @@
 // 照片导入的纯逻辑:挑出图片文件、自然排序、顺序命名 1.jpg…
-const IMAGE = /\.(jpe?g|png)$/i
+const IMAGE = /\.(jpe?g|png|webp)$/i
 const HEIC = /\.heic$/i
 
 export function planPhotos(names) {

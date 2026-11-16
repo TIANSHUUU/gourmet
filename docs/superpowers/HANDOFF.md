@@ -1,6 +1,6 @@
 # 指挥官交接(菠萝子地图项目)
 
-> 给接手「指挥官」角色的新会话(任何模型:Opus / Sonnet / Codex 都行)。上一任:Claude Fable 5.1,最后更新 2026-11-15 晚。
+> 给接手「指挥官」角色的新会话(任何模型:Opus / Sonnet / Codex 都行)。上一任:Claude Opus 5.5,最后更新 2026-11-16。
 > 本文件是活文档:每次交接前,由当时的指挥官更新 §3 现状与 §4 队列。
 > 指挥官负责:和业主讨论 → 写 spec / 实施计划 → 起执行会话 → 核实报告 → 业主拍板后合并 push。
 > 执行者(Sonnet 会话或 Codex)只按计划动手、只 commit 不 push。
@@ -27,9 +27,11 @@
 4. **合并与发布**只在业主明说「合并并 push」后:`git checkout main && git merge --no-ff feat/x && git push origin main`,push 后 `gh run watch` 确认 Deploy 跑绿,再 `curl` 线上文件确认。做完切回原分支,保持检出干净。
 5. 业主偏好:中文对话;回复先给结论;截图比描述管用;美术资产由业主自己用 GPT Image 生成,放进收件箱;数字/尺寸类决定(贴图比例、图标大小)可以自己定但要截图给业主看。
 
-## 3. 当前状态(2026-11-15)
+## 3. 当前状态(2026-11-16)
 
-**线上** `https://tianshuuu.github.io/gourmet/`:Phase 0–4 全部上线(最后一次功能合并 `38383f0`,2026-11-15),Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章、手绘小人;Takeout 导入脚本与全部地点详情页已在 main。站上内容仍只有 6 家吃喝,**还没有任何景点**。
+**线上** `https://tianshuuu.github.io/gourmet/`:Phase 0–4 全部上线(最后一次功能合并 `38383f0`,2026-11-15),Deploy 绿。地图已有:4 张 riso 贴图、6 个墨尔本地标贴纸、7 枚 SVG 分类徽章、手绘小人;Takeout 导入脚本与全部地点详情页已在 main。
+
+2026-11-16 用 **Suburbia Bakery**(业主自己的 Google 评论)试跑了 Takeout 成稿全流程,计划 `plans/2026-11-16-takeout-trial-suburbia.md`(5 个 Task)。试跑补上了四处只有 Takeout 条目才会碰到的缺口:首页卡片无照片时改用分类徽章占位(`CoverFallback` + `src/lib/cover.ts`);详情页正文按空行分段(`splitParagraphs`);地图卡片无封面时标题避让 × 按钮;`photos:import` 接受 webp。Takeout 导出里没有评论照片(`Reviews.json` 没有照片字段),业主会从 Google 地图评价页下载 webp。站上现有 7 家吃喝,**还没有任何景点**。
 
 **分支**(`web/` 是 git 根目录):
 
@@ -41,11 +43,11 @@
 
 **美术收件箱** `/Users/tantianshu/Documents/code/gourmet/map/inbox/melbourne/`(不在 git 里):`pat-{grass,wood,water,sand}.png`、`lm-{flinders,arts-centre,mcg,exhibition,shrine,luna-park}.png`、`badge-*.png`(由 `npm run badges:render` 生成)、`_preview/`。淘汰的透明版贴图和早期 AI 味图鉴在 `map/inbox/_spare/melbourne/`。风格基准 = `lm-flinders.png`(扁平 riso 贴纸,奶油描边)。
 
-**执行会话**:没有在跑的。Phase 4 的 Sonnet 会话 `local_75b2d697-d1b2-45ba-8658-45456c8d8a18` 使命已完成,可归档;成稿批次请按 §5 B 起新会话。
+**执行会话**:没有在跑的。Phase 4 的 Sonnet 会话 `local_75b2d697-d1b2-45ba-8658-45456c8d8a18`、Suburbia 试跑会话 `local_24b5b542-e5bb-4cc3-81c1-ae54abfa3b3d` 使命都已完成,可归档;成稿批次请按 §5 B 起新会话。
 
 ## 4. 下一步队列(按优先级)
 
-1. **景点成稿(Phase 4 Task 6)——当前卡在业主拍板**。Takeout 已导入:文件 `map/takeout/Maps (your places)/Reviews.json`(新格式,400 条;`map/Takeout/` 是同一份重复拷贝,可删),索引 `web/field-notes/takeout/INDEX.md`(394 草稿 / 6 已收录 / 8 缺坐标)和墨尔本子集 `INDEX-vic.md`(74 条),都在 gitignore 目录里,**丢了就重跑**:
+1. **景点成稿(Phase 4 Task 6)——管线已用 Suburbia 试跑通,其余等业主拍板**。Takeout 已导入:文件 `map/takeout/Maps (your places)/Reviews.json`(新格式,400 条;`map/Takeout/` 是同一份重复拷贝,可删),索引 `web/field-notes/takeout/INDEX.md`(394 草稿 / 6 已收录 / 8 缺坐标)和墨尔本子集 `INDEX-vic.md`(74 条),都在 gitignore 目录里,**丢了就重跑**:
 
    ```bash
    npm run -s takeout:import -- "/Users/tantianshu/Documents/code/gourmet/map/takeout/Maps (your places)/Reviews.json"
@@ -54,9 +56,16 @@
 
    分布:日本 167、澳洲 83(VIC 73)、香港 45、泰国 43、印尼 13、越南 10、西班牙 6、乌兹别克 4、无国家码 29;正文 200 字以上 152 条。
 
-   **上一任已向业主提议的第一批(墨尔本 10 家,业主尚未回复)**:Suburbia Bakery by Seven Seeds(Fairfield,咖啡/烘焙)、Riché Cafe(Richmond,咖啡)、Wasshoi Bar and Grill(South Yarra,美食)、Liquid Room Urban Sanctuary(Sandringham,玩乐/浴场)、Tatin(Balwyn North,甜点)、Co Thu Quan(Richmond,越南菜)、Leena's Bar(Elsternwick,酒吧)、Brunetti Classico(Carlton,咖啡)、Madame Sourdough(Mont Albert North,烘焙)、Lune Croissanterie(Armadale)。备选 Crittenden Wines(Dromana,450 字)在墨尔本边界外,需在 `cities.json` 新增莫宁顿半岛,建议放第二批。**先问业主要不要换人、加人,定了再开执行会话**(简报模板见 §5 B)。
+   **前任提议的第一批(墨尔本 10 家)**:~~Suburbia Bakery by Seven Seeds~~(2026-11-16 试跑已成稿,slug `suburbia-bakery`);其余 9 家业主尚未回复:Riché Cafe(Richmond,咖啡)、Wasshoi Bar and Grill(South Yarra,美食)、Liquid Room Urban Sanctuary(Sandringham,玩乐/浴场)、Tatin(Balwyn North,甜点)、Co Thu Quan(Richmond,越南菜)、Leena's Bar(Elsternwick,酒吧)、Brunetti Classico(Carlton,咖啡)、Madame Sourdough(Mont Albert North,烘焙)、Lune Croissanterie(Armadale)。备选 Crittenden Wines(Dromana,450 字)在墨尔本边界外,需在 `cities.json` 新增莫宁顿半岛,建议放第二批。**先问业主要不要换人、加人,定了再开执行会话**(简报模板见 §5 B)。
 
    成稿规则全在 Phase 4 计划 Task 6:吃喝类放 `src/data/restaurants/`(food / cafe / bar),其余放 `src/data/spots/`(sight / activity / shop / stay);双语文案简洁轻快(feedback 记忆);不显示星级;照片业主放 `/Users/tantianshu/Documents/code/gourmet/spots/<slug>/imgs/` 后 `npm run photos:import -- <目录> <slug>`,没有照片就 `images: []`;城市边界外的点要加 `cities.json`(测试会报);一批统一提交、业主看过预览再合并。
+
+   **试跑定下的做法(2026-11-16)**:
+   - **`visited` 用真实到访日期**:业主有时隔几个月才写评论,这时会附注实际日期,以附注为准;没有附注就用草稿里的评论日期。绝不为了在首页靠前而改日期。执行者只看得到草稿,所以业主附注的日期要逐条写进简报。
+   - **编辑决定由指挥官在计划里定死**:分类、slug、`map_url`、`visited`、类型标签。执行者只写 tagline 和双语正文,并按计划的事实清单自查。**正文必须忠实原文**:业主看过试跑稿后明确说「不用多加……之类的话语，按照我的原文翻译即可」(试跑稿自己加了「算是意外之喜 / Happy accident」,还把英文意译了)。指挥官要对照草稿逐句核:有没有多出来的话、有没有改写业主的原话。
+   - `map_url`:保留 Takeout 的 ftid `!1s0x…:0x…`,`takeout:import` 靠它判重;路径里补上店名(`/maps/place/<Name+With+Pluses>/data=!4m2!3m1!1s0x…`)。写进计划前,先在浏览器里点开确认能到对的店。
+   - 吃喝类的照片目录按 `gourmet/{restaurant,cafe,winebar}/<名字>/imgs/` 的老习惯放;没有照片就 `images: []`,首页卡片会显示徽章占位。
+   - 预览要看三处:首页卡片、手机上的详情页、`/map?city=…&place=<slug>` 的卡片。地图瓦片要等 10 秒左右才出来。
 2. **小人手绘版**:已完成上线(`npm run walker:slice` + `map:assets`,见 CLAUDE.md Map 一节)。重画时同样流程。
 3. **美术待拍板**:z14+ 市中心 3D 建筑棕色太抢戏(`scripts/build-map-style.mjs` 的 `building` / `building3d`);配色 A/B;地标与店名的碰撞优先级(现在店名永远优先)。
 4. 其他城市(十和田、Mount Gambier)的地标与贴图铺开;「About Me」页(业主心愿);`gourmet/{restaurant,cafe,winebar}/` 里未发布的条目。
@@ -80,8 +89,9 @@
 你在 /Users/tantianshu/Documents/code/gourmet/web(共用检出,不要新建 worktree)。
 先完整读 CLAUDE.md(尤其「Adding a new place」「Importing Google reviews」「Style」),再读 docs/superpowers/plans/2026-11-14-pineapple-map-phase4-takeout.md 的 Task 6。
 从 main 切出分支 feat/spots-batch-<N>。草稿在 field-notes/takeout/<slug>.md(gitignore,不要提交),按 Task 6 的 10 条清单逐个成稿:<slug 列表>。
-吃喝类放 src/data/restaurants/,其余放 src/data/spots/;双语正文以草稿的 ## takeout 为底,写得简洁、轻快、略带幽默,不逐字直译,不出现星级;照片目录不存在就 images: []。
+吃喝类放 src/data/restaurants/,其余放 src/data/spots/;双语正文忠实于草稿的 ## takeout 原文:原文那种语言只修笔误和语法,另一种语言自然、口语化地翻译,不增不减(不要自己加俏皮话或总结句),不出现星级;照片目录不存在就 images: []。
 每条都要有 coords;落在现有城市边界外的,按 Task 6 Step 3 加 cities.json。
+visited 用业主附注的到访日期:<slug: YYYY-MM-DD 列表,没有附注的写「用草稿评论日期」>。分类 / slug / map_url / 类型标签按计划里定好的照抄。
 一批做完统一一次 commit;不 push、不合并 main。跑 npm run lint && npm run test && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build。
 报告:每条的 slug / 分类 / 城市 / 双语 tagline,地图卡片与详情页截图路径,最后一句「等你看过文案和预览,再合并到 main 并 push」。
 ```

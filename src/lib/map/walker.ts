@@ -62,6 +62,16 @@ export function facingFromDx(dx: number, prev: 1 | -1): 1 | -1 {
   return dx > 0 ? 1 : dx < 0 ? -1 : prev
 }
 
+/**
+ * 要不要水平镜像精灵图,小人才会脸朝行进方向。
+ * facing:1 = 往屏幕右走,-1 = 往左走(facingFromDx / pathPosition 的约定)。
+ * artFacesLeft:原画(未镜像的帧)脸朝左。手绘版(2026-11-15)是脸朝左的四分之三侧脸;
+ * 像素版是对称正脸,按朝右处理。
+ */
+export function spriteFlipped(facing: 1 | -1, artFacesLeft: boolean): boolean {
+  return artFacesLeft ? facing === 1 : facing === -1
+}
+
 export type PlacePoint = { slug: string; coords: LngLat }
 
 export function nearestWithin(pos: LngLat, places: PlacePoint[], radiusM: number): { slug: string; dist: number } | null {

@@ -36,8 +36,8 @@ describe('walkerSpriteUrl / hasIcon / storefrontSlugs', () => {
   it('picks the painted sheet only when the manifest has it', () => {
     expect(walkerSpriteUrl(full, '/gourmet')).toBe('/gourmet/sprites/pineapple-painted.png')
     expect(walkerSpriteUrl(EMPTY_MANIFEST, '')).toBe('/sprites/pineapple-classic.png')
-    expect(walkerSprite(full, '/gourmet')).toEqual({ url: '/gourmet/sprites/pineapple-painted.png', pixelArt: false })
-    expect(walkerSprite(EMPTY_MANIFEST, '')).toEqual({ url: '/sprites/pineapple-classic.png', pixelArt: true })
+    expect(walkerSprite(full, '/gourmet')).toEqual({ url: '/gourmet/sprites/pineapple-painted.png', pixelArt: false, facesLeft: true })
+    expect(walkerSprite(EMPTY_MANIFEST, '')).toEqual({ url: '/sprites/pineapple-classic.png', pixelArt: true, facesLeft: false })
   })
   it('hasIcon checks the icons list', () => {
     expect(hasIcon(full, 'badge-food')).toBe(true)

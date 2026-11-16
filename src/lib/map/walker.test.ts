@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   autoWalkDuration, dirFromKeys, facingFromDx, movePoint, nearestWithin, normalize,
-  proximityStep, NEAR_IDLE, WALK_KEYS, type PlacePoint,
+  proximityStep, spriteFlipped, NEAR_IDLE, WALK_KEYS, type PlacePoint,
 } from './walker'
 
 describe('dirFromKeys', () => {
@@ -36,6 +36,17 @@ describe('normalize / movePoint / facingFromDx', () => {
     expect(facingFromDx(1, -1)).toBe(1)
     expect(facingFromDx(-0.5, 1)).toBe(-1)
     expect(facingFromDx(0, -1)).toBe(-1)
+  })
+})
+
+describe('spriteFlipped', () => {
+  it('mirrors left-facing art when walking right, and right-facing art when walking left', () => {
+    // 手绘版:原画脸朝左
+    expect(spriteFlipped(1, true)).toBe(true)
+    expect(spriteFlipped(-1, true)).toBe(false)
+    // 像素版:按朝右处理
+    expect(spriteFlipped(1, false)).toBe(false)
+    expect(spriteFlipped(-1, false)).toBe(true)
   })
 })
 

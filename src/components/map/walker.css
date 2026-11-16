@@ -1,7 +1,9 @@
 /* 像素菠萝子(移植自 travel-timeline/src/styles/sprite.css 的 .pp-* 部分)。
    雪碧图 512×480:4 列 × 128px,3 行 × 160px;行0 idle×2 / 行1 walk×4 / 行2 celebrate×2。
    背景图 URL 不写在这里(要带 basePath),由 walkerMarker.ts 用 style.backgroundImage 设置。
-   手绘版(public/sprites/pineapple-painted.png)用同一帧表;只有像素版需要 .pp-pixel 的硬边缩放。 */
+   手绘版(public/sprites/pineapple-painted.png)用同一帧表;只有像素版需要 .pp-pixel 的硬边缩放。
+   .pp-flip 只负责镜像;哪个行进方向要镜像,由 spriteFlipped()(src/lib/map/walker.ts)按原画朝向决定
+   ——手绘版原画脸朝左,像素版按朝右。 */
 .pp-sprite {
   width: 128px;
   height: 160px;
@@ -17,7 +19,7 @@
 .pp-celebrate { background-position-y: -320px; animation: pp-cel 0.5s steps(2) 3; }
 @keyframes pp-cel { to { background-position-x: -256px; } }
 
-/* 缩放/翻转挂在内层 sprite 上:MapLibre 会覆写 marker 根元素的 transform 来定位 */
+/* 缩放/镜像挂在内层 sprite 上:MapLibre 会覆写 marker 根元素的 transform 来定位 */
 .pp-map { transform: scale(0.35); transform-origin: bottom center; }
 .pp-map.pp-flip { transform: scale(0.35) scaleX(-1); }
 

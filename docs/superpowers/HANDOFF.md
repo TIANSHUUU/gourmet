@@ -33,6 +33,8 @@
 
 2026-11-16 用 **Suburbia Bakery**(业主自己的 Google 评论)试跑了 Takeout 成稿全流程,计划 `plans/2026-11-16-takeout-trial-suburbia.md`(5 个 Task)。试跑补上了四处只有 Takeout 条目才会碰到的缺口:首页卡片无照片时改用分类徽章占位(`CoverFallback` + `src/lib/cover.ts`);详情页正文按空行分段(`splitParagraphs`);地图卡片无封面时标题避让 × 按钮;`photos:import` 接受 webp。Takeout 导出里没有评论照片(`Reviews.json` 没有照片字段),业主会从 Google 地图评价页下载 webp。站上现有 7 家吃喝,**还没有任何景点**。
 
+同日第二批(计划 `plans/2026-11-16-content-batch-2.md`,7 个 Task):新增第 4 个吃喝分类 **烘焙 / Bakeries**(`bakery`,可颂徽章 `#C2557A`,Suburbia 与 Soma Pastry 挪入);新增城市 **莫宁顿半岛**、**金泽**;成稿 Wasshoi、Tatin、Madame Sourdough、Crittenden Wines、金沢鮨 藍AO、Aunty Peg's。站上现有 13 家吃喝,仍无景点。原图库新增 `gourmet/bakery/`。
+
 **分支**(`web/` 是 git 根目录):
 
 | 分支 | 状态 | 说明 |
@@ -56,7 +58,7 @@
 
    分布:日本 167、澳洲 83(VIC 73)、香港 45、泰国 43、印尼 13、越南 10、西班牙 6、乌兹别克 4、无国家码 29;正文 200 字以上 152 条。
 
-   **前任提议的第一批(墨尔本 10 家)**:~~Suburbia Bakery by Seven Seeds~~(2026-11-16 试跑已成稿,slug `suburbia-bakery`);其余 9 家业主尚未回复:Riché Cafe(Richmond,咖啡)、Wasshoi Bar and Grill(South Yarra,美食)、Liquid Room Urban Sanctuary(Sandringham,玩乐/浴场)、Tatin(Balwyn North,甜点)、Co Thu Quan(Richmond,越南菜)、Leena's Bar(Elsternwick,酒吧)、Brunetti Classico(Carlton,咖啡)、Madame Sourdough(Mont Albert North,烘焙)、Lune Croissanterie(Armadale)。备选 Crittenden Wines(Dromana,450 字)在墨尔本边界外,需在 `cities.json` 新增莫宁顿半岛,建议放第二批。**先问业主要不要换人、加人,定了再开执行会话**(简报模板见 §5 B)。
+   **前任提议的第一批(墨尔本 10 家)**:~~Suburbia Bakery by Seven Seeds~~(2026-11-16 试跑已成稿,slug `suburbia-bakery`);第二批(2026-11-16)业主改挑了 Wasshoi、Tatin、Madame Sourdough、Crittenden、金沢鮨 藍AO、Aunty Peg's 并已上线;原名单里还没做的 6 家:Riché Cafe(Richmond,咖啡)、Liquid Room Urban Sanctuary(Sandringham,玩乐/浴场,将是第一个景点类条目)、Co Thu Quan(Richmond,越南菜)、Leena's Bar(Elsternwick,酒吧)、Brunetti Classico(Carlton,咖啡)、Lune Croissanterie(Armadale,烘焙)。**先问业主要不要换人、加人,定了再开执行会话**(简报模板见 §5 B)。
 
    成稿规则全在 Phase 4 计划 Task 6:吃喝类放 `src/data/restaurants/`(food / cafe / bar),其余放 `src/data/spots/`(sight / activity / shop / stay);双语文案简洁轻快(feedback 记忆);不显示星级;照片业主放 `/Users/tantianshu/Documents/code/gourmet/spots/<slug>/imgs/` 后 `npm run photos:import -- <目录> <slug>`,没有照片就 `images: []`;城市边界外的点要加 `cities.json`(测试会报);一批统一提交、业主看过预览再合并。
 
@@ -64,11 +66,12 @@
    - **`visited` 用真实到访日期**:业主有时隔几个月才写评论,这时会附注实际日期,以附注为准;没有附注就用草稿里的评论日期。绝不为了在首页靠前而改日期。执行者只看得到草稿,所以业主附注的日期要逐条写进简报。
    - **编辑决定由指挥官在计划里定死**:分类、slug、`map_url`、`visited`、类型标签。执行者只写 tagline 和双语正文,并按计划的事实清单自查。**正文必须忠实原文**:业主看过试跑稿后明确说「不用多加……之类的话语，按照我的原文翻译即可」(试跑稿自己加了「算是意外之喜 / Happy accident」,还把英文意译了)。指挥官要对照草稿逐句核:有没有多出来的话、有没有改写业主的原话。
    - `map_url`:保留 Takeout 的 ftid `!1s0x…:0x…`,`takeout:import` 靠它判重;路径里补上店名(`/maps/place/<Name+With+Pluses>/data=!4m2!3m1!1s0x…`)。写进计划前,先在浏览器里点开确认能到对的店。
-   - 吃喝类的照片目录按 `gourmet/{restaurant,cafe,winebar}/<名字>/imgs/` 的老习惯放;没有照片就 `images: []`,首页卡片会显示徽章占位。
+   - 吃喝类的照片目录按分类放 `gourmet/{restaurant,cafe,bakery,winebar}/<名字>/imgs/`(`bakery/` 是 2026-11-16 随「烘焙」分类新建的);没有照片就 `images: []`,首页卡片会显示徽章占位。
    - 预览要看三处:首页卡片、手机上的详情页、`/map?city=…&place=<slug>` 的卡片。地图瓦片要等 10 秒左右才出来。
 2. **小人手绘版**:已完成上线(`npm run walker:slice` + `map:assets`,见 CLAUDE.md Map 一节)。重画时同样流程。
 3. **美术待拍板**:z14+ 市中心 3D 建筑棕色太抢戏(`scripts/build-map-style.mjs` 的 `building` / `building3d`);配色 A/B;地标与店名的碰撞优先级(现在店名永远优先)。
 4. 其他城市(十和田、Mount Gambier)的地标与贴图铺开;「About Me」页(业主心愿);`gourmet/{restaurant,cafe,winebar}/` 里未发布的条目。
+5. **以后可加(业主 2026-11-16 提出,暂缓,先丰富内容)**:菠萝子在地图上每累计走约 10 秒,弹一条该城市的冷门小知识(电视问答风,中英双语,每条要有出处);已评估过,对加载几乎无影响(100 条约 10 KB gzip,可懒加载),工作量主要在内容核实和交互(计时口径、与店铺卡片的冲突、手机端位置、频率与不重复)。
 
 ## 5. 执行会话简报模板
 

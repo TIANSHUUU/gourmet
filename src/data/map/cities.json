@@ -19,5 +19,19 @@
     "name_en": "Mount Gambier",
     "bounds": [[140.7, -37.88], [140.85, -37.78]],
     "view": { "center": [140.7838, -37.8297], "zoom": 15, "pitch": 50, "bearing": 0 }
+  },
+  {
+    "slug": "mornington-peninsula",
+    "name_zh": "莫宁顿半岛",
+    "name_en": "Mornington Peninsula",
+    "bounds": [[144.65, -38.5], [145.3, -38.12]],
+    "view": { "center": [145.0, -38.33], "zoom": 14, "pitch": 45, "bearing": 0 }
+  },
+  {
+    "slug": "kanazawa",
+    "name_zh": "金泽(石川)",
+    "name_en": "Kanazawa, Ishikawa",
+    "bounds": [[136.55, 36.48], [136.78, 36.65]],
+    "view": { "center": [136.6566, 36.5613], "zoom": 14.5, "pitch": 45, "bearing": 0 }
   }
 ]

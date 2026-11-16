@@ -1,4 +1,4 @@
-// 把 scripts/lib/badges.mjs 的 7 枚 SVG 徽章渲染成 badge-<kind>.png(96×96,透明底)放进收件箱,
+// 把 scripts/lib/badges.mjs 的 8 枚 SVG 徽章渲染成 badge-<kind>.png(96×96,透明底)放进收件箱,
 // 并在 <收件箱>/_preview/badges.png 生成一张 32 px 实际大小的对照图。之后跑 `npm run map:assets` 入库。
 //   npm run badges:render                  → ../map/inbox/melbourne(相对 web/)
 //   npm run badges:render -- --out <dir>   → 指定目录

@@ -9,9 +9,10 @@ const LABELS: Record<CategoryFilter, { en: string; zh: string }> = {
   all: { en: 'All', zh: '全部' },
   food: { en: 'Food', zh: '美食' },
   cafe: { en: 'Cafés', zh: '咖啡' },
+  bakery: { en: 'Bakeries', zh: '烘焙' },
   bar: { en: 'Bars', zh: '酒吧' },
 }
-const ORDER: CategoryFilter[] = ['all', 'food', 'cafe', 'bar']
+const ORDER: CategoryFilter[] = ['all', 'food', 'cafe', 'bakery', 'bar']
 
 export default function CategoryNav({
   value,

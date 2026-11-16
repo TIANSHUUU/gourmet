@@ -15,6 +15,8 @@ describe('cityOf', () => {
     expect(cityOf([144.984692, -37.797961])?.slug).toBe('melbourne') // Zareh
     expect(cityOf([141.205015, 40.615081])?.slug).toBe('towada') // Soma Pastry
     expect(cityOf([140.783782, -37.829651])?.slug).toBe('mount-gambier') // South Australian Hotel
+    expect(cityOf([145.019116, -38.3353])?.slug).toBe('mornington-peninsula') // Crittenden Wines
+    expect(cityOf([136.650668, 36.558865])?.slug).toBe('kanazawa') // 金沢鮨 藍AO
   })
   it('returns null outside every city', () => {
     expect(cityOf([0, 0])).toBeNull()

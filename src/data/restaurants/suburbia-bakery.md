@@ -3,7 +3,7 @@ slug: suburbia-bakery
 name: "Suburbia Bakery by Seven Seeds"
 suburb: "Fairfield"
 city: "Melbourne"
-category: cafe
+category: bakery
 cuisine_en: "Bakery café"
 cuisine_zh: "烘焙咖啡馆"
 map_url: "https://www.google.com/maps/place/Suburbia+Bakery+by+Seven+Seeds/data=!4m2!3m1!1s0x0:0x74d008e2d2ce52e1"

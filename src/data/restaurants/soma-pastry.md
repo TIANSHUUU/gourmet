@@ -3,7 +3,7 @@ slug: soma-pastry
 name: "Soma Pastry Shop"
 suburb: "Towada"
 city: "Aomori"
-category: food
+category: bakery
 cuisine_en: "Pastry Shop"
 cuisine_zh: "甜品店"
 map_url: "https://www.google.com/maps/place/Soma+Pastry+Shop/@40.6150807,141.2024399,17z/data=!3m1!4b1!4m6!3m5!1s0x5f9b42487dd891f5:0xcc434d45722b0cdb!8m2!3d40.6150807!4d141.2050148!16s%2Fg%2F1tf6rmnt?entry=ttu&g_ep=EgoyMDI2MDcxOS4wIKXMDSoASAFQAw%3D%3D"

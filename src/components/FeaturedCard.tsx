@@ -5,10 +5,11 @@ import Link from 'next/link'
 import { useLang } from './LanguageContext'
 import type { Restaurant } from '@/lib/restaurants'
 import { basePath } from '@/lib/basePath'
+import CoverFallback from './CoverFallback'
 
 export default function FeaturedCard({ restaurant, number }: { restaurant: Restaurant; number: number }) {
   const { lang } = useLang()
-  const { slug, name, suburb, city, cuisine_en, cuisine_zh, tagline_en, tagline_zh, images } = restaurant
+  const { slug, name, suburb, city, category, cuisine_en, cuisine_zh, tagline_en, tagline_zh, images } = restaurant
   const cuisine = lang === 'en' ? cuisine_en : cuisine_zh
   const tagline = lang === 'en' ? tagline_en : tagline_zh
   const num = String(number).padStart(2, '0')
@@ -17,14 +18,18 @@ export default function FeaturedCard({ restaurant, number }: { restaurant: Resta
     <Link href={`/${slug}`} className="group block border-b-[1.5px] border-[#0F84B5] pb-8 mb-8">
       <div className="grid md:grid-cols-[1.15fr_1fr] gap-7 items-center">
         <div className="relative aspect-[4/3] overflow-hidden">
-          <Image
-            src={`${basePath}/images/${slug}/${images[0]}`}
-            alt={name}
-            fill
-            priority
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, 560px"
-          />
+          {images.length > 0 ? (
+            <Image
+              src={`${basePath}/images/${slug}/${images[0]}`}
+              alt={name}
+              fill
+              priority
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 560px"
+            />
+          ) : (
+            <CoverFallback category={category} size={80} />
+          )}
         </div>
         <div>
           <div className="flex items-center gap-3 mb-3">

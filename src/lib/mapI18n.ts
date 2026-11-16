@@ -31,7 +31,7 @@ export const MAP_UI: Record<'en' | 'zh', MapUIStrings> = {
     noResults: 'No matching place',
     overview: 'Overview',
     kinds: {
-      food: 'Food', cafe: 'Cafés', bar: 'Bars',
+      food: 'Food', cafe: 'Cafés', bakery: 'Bakeries', bar: 'Bars',
       sight: 'Sights', activity: 'Things to do', shop: 'Shops', stay: 'Stays',
     },
     viewStory: 'Read the story →',
@@ -56,7 +56,7 @@ export const MAP_UI: Record<'en' | 'zh', MapUIStrings> = {
     noResults: '没有匹配的地方',
     overview: '总览',
     kinds: {
-      food: '美食', cafe: '咖啡', bar: '酒吧',
+      food: '美食', cafe: '咖啡', bakery: '烘焙', bar: '酒吧',
       sight: '景点', activity: '玩乐', shop: '买买买', stay: '住宿',
     },
     viewStory: '查看图文 →',

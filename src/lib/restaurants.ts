@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
-export type Category = 'food' | 'cafe' | 'bar'
+export type Category = 'food' | 'cafe' | 'bakery' | 'bar'
 
 export type Restaurant = {
   slug: string

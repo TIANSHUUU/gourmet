@@ -36,6 +36,11 @@ describe('parsePlaceFile', () => {
     expect(p.images).toEqual(['1.jpg'])
   })
 
+  it('accepts bakery as a restaurants/ category', () => {
+    const raw = base.replace('category: food', 'category: bakery')
+    expect(parsePlaceFile(raw, 'restaurants/test.md', RESTAURANT_KINDS).kind).toBe('bakery')
+  })
+
   it('names the file when coords are missing', () => {
     const raw = base.replace(/^coords:.*\n/m, '')
     expect(() => parsePlaceFile(raw, 'restaurants/test.md', RESTAURANT_KINDS)).toThrow(/restaurants\/test\.md.*coords/)

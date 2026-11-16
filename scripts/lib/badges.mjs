@@ -1,4 +1,4 @@
-// 分类徽章(全站共用,7 种 kind):实色圆底 + 奶油色剪影图案,SVG 96×96 → 地图上 32 CSS px(pixelRatio 3)。
+// 分类徽章(全站共用,8 种 kind):实色圆底 + 奶油色剪影图案,SVG 96×96 → 地图上 32 CSS px(pixelRatio 3)。
 // 渲染:`npm run badges:render`(scripts/render-badges.mjs)写 PNG 进收件箱,再 `npm run map:assets` 入库。
 // 设计约束:缩到 32 px 还要分得清 → 每个图案只有一个粗剪影,不画细线、不写字、不加阴影。
 
@@ -6,6 +6,7 @@
 export const BADGE_COLORS = {
   food: '#E8603C',
   cafe: '#8C5A3C',
+  bakery: '#C2557A',
   bar: '#7B4B94',
   sight: '#2F8F83',
   activity: '#3C8ABF',
@@ -32,6 +33,14 @@ const GLYPHS = {
     <path d="M26 34 H66 V54 Q66 68 52 68 H40 Q26 68 26 54 Z" fill="${CREAM}"/>
     <rect x="20" y="72" width="56" height="6" rx="3" fill="${CREAM}"/>
     <path d="M38 22 Q34 27 38 32 M50 20 Q46 25 50 30" fill="none" stroke="${CREAM}" stroke-width="4" stroke-linecap="round"/>`,
+  // 可颂(五段分层的弯月),整体下移 6 px 让视觉重心居中
+  bakery: (c) => `<g transform="translate(0 6)">
+    <path d="M16 62 Q16 50 26 46 Q32 32 48 28 Q64 32 70 46 Q80 50 80 62 Q80 68 74 68 Q68 62 62 62 Q58 54 48 54 Q38 54 34 62 Q28 62 22 68 Q16 68 16 62 Z" fill="${CREAM}"/>
+    <path d="M38 32 Q43 43 41 55" fill="none" stroke="${c}" stroke-width="3.4" stroke-linecap="round"/>
+    <path d="M58 32 Q53 43 55 55" fill="none" stroke="${c}" stroke-width="3.4" stroke-linecap="round"/>
+    <path d="M27 47 Q32 54 31 62" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/>
+    <path d="M69 47 Q64 54 65 62" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/>
+    </g>`,
   // 红酒杯(杯肚半满)
   bar: (c) => `
     <path d="M28 22 H68 V38 Q68 58 48 60 Q28 58 28 38 Z" fill="${CREAM}"/>

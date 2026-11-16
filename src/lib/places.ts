@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { parseReviews, type Restaurant } from './restaurants'
 
 /** 吃喝三类沿用 restaurants/;玩乐四类放 spots/。地图上统一叫 kind */
-export const RESTAURANT_KINDS = ['food', 'cafe', 'bar'] as const
+export const RESTAURANT_KINDS = ['food', 'cafe', 'bakery', 'bar'] as const
 export const SPOT_KINDS = ['sight', 'activity', 'shop', 'stay'] as const
 export type PlaceKind = (typeof RESTAURANT_KINDS)[number] | (typeof SPOT_KINDS)[number]
 

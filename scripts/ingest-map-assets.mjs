@@ -74,7 +74,7 @@ async function writeSyntheticInbox(dir) {
   await mkdir(dir, { recursive: true })
   const files = []
   for (const name of ['pat-wood', 'pat-grass', 'pat-water', 'pat-sand']) files.push([`${name}.png`, svgPattern(name)])
-  const badges = { food: ['F', '#E8603C'], cafe: ['C', '#8C5A3C'], bar: ['B', '#7B4B94'], sight: ['S', '#2F8F83'], activity: ['A', '#3C8ABF'], shop: ['Sh', '#D58A2B'], stay: ['St', '#5A6B9E'] }
+  const badges = { food: ['F', '#E8603C'], cafe: ['C', '#8C5A3C'], bakery: ['Bk', '#C2557A'], bar: ['B', '#7B4B94'], sight: ['S', '#2F8F83'], activity: ['A', '#3C8ABF'], shop: ['Sh', '#D58A2B'], stay: ['St', '#5A6B9E'] }
   for (const [k, [label, color]] of Object.entries(badges)) files.push([`badge-${k}.png`, svgBadge(label, color)])
   const lms = { flinders: ['FSS', '#D9A441'], 'arts-centre': ['ART', '#C9C9C9'], mcg: ['MCG', '#5A6B9E'], exhibition: ['REB', '#E9DCC2'], shrine: ['SHR', '#9A9A9A'], 'luna-park': ['LUNA', '#E8603C'] }
   for (const [k, [label, color]] of Object.entries(lms)) files.push([`lm-${k}.png`, svgLandmark(label, color)])

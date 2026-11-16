@@ -14,7 +14,7 @@ A personal bilingual (EN/ZH) restaurant/café/wine bar guide, Michelin-style lay
 ## Adding a new place
 Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,winebar}/<name>/` as a `.md` (raw EN notes) + `imgs/` folder. To publish:
 
-1. Photos: put the originals in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,winebar,spots}/<name>/imgs/` (HEIC → JPEG first), then `npm run photos:import -- <that dir> <slug>` → `web/public/images/<slug>/1.jpg…` (long edge 1600, auto-oriented, EXIF/GPS stripped) and paste the printed `images:` list. Older entries were copied as full-size originals; re-import them the same way if a page feels heavy.
+1. Photos: put the originals in `/Users/tantianshu/Documents/code/gourmet/{restaurant,cafe,winebar,spots}/<name>/imgs/` (HEIC → JPEG first), then `npm run photos:import -- <that dir> <slug>` → `web/public/images/<slug>/1.jpg…` (long edge 1600, auto-oriented, EXIF/GPS stripped) and paste the printed `images:` list. Older entries were copied as full-size originals; re-import them the same way if a page feels heavy. No photos yet → `images: []`: homepage cards fall back to `CoverFallback` (category colour wash + painted badge from `badgePath()` in `src/lib/cover.ts`), the detail page and the map card simply omit the picture.
 2. Create `web/src/data/restaurants/<slug>.md`:
    ```yaml
    ---
@@ -35,7 +35,7 @@ Source content lives in `/Users/tantianshu/Documents/code/gourmet/{restaurant,ca
 
 ## Status
 - **Resuming as the commander/planner (any model): read `docs/superpowers/HANDOFF.md` first** — current state, next steps, how executor sessions are run and verified, known pitfalls. `docs/superpowers/codex-executor.md` covers running plans with Codex instead of a Claude session.
-- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Collingwood/Melbourne)
+- Added so far: marys (Nigerian, Collingwood/Melbourne), south-aus-hotel (wine bar, Mount Gambier), death-and-co (cocktail bar, CBD/Melbourne), soma-pastry (pastry shop, Towada/Aomori), dons (wine bar, Prahran/Melbourne), zareh (Middle Eastern, Collingwood/Melbourne), suburbia-bakery (bakery café, Fairfield/Melbourne — first entry from Google Takeout, no photos yet)
 - `map_type` drives the map CTA in `RestaurantDetail.tsx`: `amap` → 「在高德地图查看 / Open in Amap」, anything else → Google Maps wording. Mainland China entries can now use `map_type: amap` with an `amap.com` / `uri.amap.com` link.
 - Source folders `cafe/` and `restaurant/`/`winebar/` at the gourmet root may have more unpublished entries — check before assuming all content is live.
 - 地图(2026-11):总策划案 `docs/superpowers/specs/2026-11-13-pineapple-map-design.md`;Phase 0(数据)、Phase 1(`/map`)、Phase 2(小人)、Phase 3(资产管线·墨尔本试点)已完成,见下方「Map」一节;墨尔本美术资产(贴图 / 地标 / 徽章 / 手绘小人)已于 2026-11-15 全部上线;Phase 4(Takeout 导入管线 + 景点详情页)已完成;景点内容按 `INDEX.md` 逐批成稿。

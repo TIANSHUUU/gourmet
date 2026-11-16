@@ -53,4 +53,8 @@ describe('pathPosition', () => {
     expect(pathPosition(path, 0.5).facing).toBe(1)
     expect(pathPosition(buildPath([[10, 0], [0, 0]], 10), 0.5).facing).toBe(-1)
   })
+  it('keeps the last segment\'s direction at the end of the path (no about-face on arrival)', () => {
+    expect(pathPosition(buildPath([[10, 0], [0, 0]], 10), 1).facing).toBe(-1)
+    expect(pathPosition(path, 1).facing).toBe(1)
+  })
 })

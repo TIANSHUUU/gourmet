@@ -421,3 +421,81 @@ git commit -m "Docs: painted walker faces left; spriteFlipped() handles mirrorin
   - 按住 ← 往左走:没有 `pp-flip`,墨镜偏左;
   - 松手后停住的 idle 保持最后的朝向。
 - 点另一家店的标签让小人自动走过去,看朝向和走向一致(注:自动行走的朝向按经度算,地图转过角度时可能不准,本计划不处理)。
+
+---
+
+## 追加(指挥官预览验收后,2026-11-16)
+
+### Task 5: 自动行走到站时不要转身
+
+验收结果:方向键 → / ← 朝向都对了;但点店名(或搜索)让小人自动走过去时,往西走一路脸朝左(对),**一到站就转身朝右**庆祝。根因在 `src/lib/map/geo.ts` 的 `pathPosition()`:`t = 1` 时 `idx` 是最后一个点,`next` 也是它自己,`next[0] >= pos[0]` 恒为真 → 朝向一律回到 +1(朝右)。修法:终点处改看**最后一段**的走向。(修复前同样会在到站时转身,只是方向正好反过来,所以一直没被注意到。)
+
+**Files:**
+- Modify: `src/lib/map/geo.ts`(`pathPosition` 整个函数)
+- Test: `src/lib/map/geo.test.ts`(`describe('pathPosition', …)` 里追加一个 `it`)
+
+- [ ] **Step 1: 写失败的测试**
+
+`src/lib/map/geo.test.ts` 的 `describe('pathPosition', …)` 里,`it('faces east when the path heads east and west when it heads west', …)` 之后追加:
+
+```ts
+  it('keeps the last segment\'s direction at the end of the path (no about-face on arrival)', () => {
+    expect(pathPosition(buildPath([[10, 0], [0, 0]], 10), 1).facing).toBe(-1)
+    expect(pathPosition(path, 1).facing).toBe(1)
+  })
+```
+
+- [ ] **Step 2: 跑测试确认失败**
+
+Run: `npx vitest run src/lib/map/geo.test.ts`
+Expected: 新测试 FAIL(第一条期望 -1,实际 1)。
+
+- [ ] **Step 3: 实现**
+
+`src/lib/map/geo.ts` 里整个函数
+
+```ts
+/** 进度 t ∈ [0,1] 对应的路径点与朝向(1 = 向东 / 右,-1 = 向西 / 左) */
+export function pathPosition(path: LngLat[], t: number): { pos: LngLat; facing: 1 | -1 } {
+  const c = Math.min(1, Math.max(0, t))
+  const idx = Math.min(path.length - 1, Math.floor(c * (path.length - 1)))
+  const pos = path[idx]
+  const next = path[Math.min(path.length - 1, idx + 1)]
+  return { pos, facing: next[0] >= pos[0] ? 1 : -1 }
+}
+```
+
+替换为
+
+```ts
+/**
+ * 进度 t ∈ [0,1] 对应的路径点与朝向(1 = 向东 / 右,-1 = 向西 / 左)。
+ * 朝向看当前所在那一段的走向;到了终点就看最后一段——否则终点的"下一个点"是它自己,
+ * 朝向会一律变成向东,小人往西走到站时会突然转身。
+ */
+export function pathPosition(path: LngLat[], t: number): { pos: LngLat; facing: 1 | -1 } {
+  const c = Math.min(1, Math.max(0, t))
+  const last = path.length - 1
+  const idx = Math.min(last, Math.floor(c * last))
+  const pos = path[idx]
+  const [from, to] = idx < last ? [pos, path[idx + 1]] : [path[Math.max(0, last - 1)], pos]
+  return { pos, facing: to[0] >= from[0] ? 1 : -1 }
+}
+```
+
+- [ ] **Step 4: 跑测试确认通过**
+
+Run: `npx vitest run src/lib/map/geo.test.ts`
+Expected: PASS。
+
+- [ ] **Step 5: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;测试 **168 passed**(167 + 1);构建成功。
+
+- [ ] **Step 6: Commit(连同本计划文件的这段追加)**
+
+```bash
+git add src/lib/map/geo.ts src/lib/map/geo.test.ts docs/superpowers/plans/2026-11-16-walker-facing.md
+git commit -m "Auto-walk: keep the last segment's facing on arrival instead of turning east"
+```

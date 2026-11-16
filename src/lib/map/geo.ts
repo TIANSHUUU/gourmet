@@ -40,11 +40,16 @@ export function buildPath(points: LngLat[], samplesPerSeg = 48): LngLat[] {
   return out
 }
 
-/** 进度 t ∈ [0,1] 对应的路径点与朝向(1 = 向东 / 右,-1 = 向西 / 左) */
+/**
+ * 进度 t ∈ [0,1] 对应的路径点与朝向(1 = 向东 / 右,-1 = 向西 / 左)。
+ * 朝向看当前所在那一段的走向;到了终点就看最后一段——否则终点的"下一个点"是它自己,
+ * 朝向会一律变成向东,小人往西走到站时会突然转身。
+ */
 export function pathPosition(path: LngLat[], t: number): { pos: LngLat; facing: 1 | -1 } {
   const c = Math.min(1, Math.max(0, t))
-  const idx = Math.min(path.length - 1, Math.floor(c * (path.length - 1)))
+  const last = path.length - 1
+  const idx = Math.min(last, Math.floor(c * last))
   const pos = path[idx]
-  const next = path[Math.min(path.length - 1, idx + 1)]
-  return { pos, facing: next[0] >= pos[0] ? 1 : -1 }
+  const [from, to] = idx < last ? [pos, path[idx + 1]] : [path[Math.max(0, last - 1)], pos]
+  return { pos, facing: to[0] >= from[0] ? 1 : -1 }
 }

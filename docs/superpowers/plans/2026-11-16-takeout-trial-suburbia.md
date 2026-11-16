@@ -535,3 +535,119 @@ Expected: 打印 `<p>Cosy, friendly`(第二段自成一个 `<p>`)。
 git add src/lib/format.ts src/lib/format.test.ts src/components/RestaurantDetail.tsx src/components/map/PlaceCard.tsx docs/superpowers/plans/2026-11-16-takeout-trial-suburbia.md
 git commit -m "Detail page: render review paragraphs; map card: keep long names clear of the close button"
 ```
+
+### Task 5: 正文改为忠实原文 + 照片导入支持 webp
+
+业主看过预览后的两条反馈:(1)「不用多加『算是意外之喜 / Happy accident』之类的话语，按照我的原文翻译即可」——英文用业主原话、只修笔误,中文忠实翻译;(2) 业主的评论照片要从 Google 地图评价页下载,格式是 webp,而 `scripts/lib/photos.mjs` 只认 jpg/png,webp 会被悄悄跳过。sharp 能直接读 webp(已核实 `sharp.format.webp.input.file === true`)。
+
+**Files:**
+- Modify: `src/data/restaurants/suburbia-bakery.md`(只换 `## en` 与 `## zh` 两段正文;frontmatter 与 tagline 不动)
+- Modify: `scripts/lib/photos.mjs`(第 2 行正则)
+- Test: `scripts/lib/photos.test.mjs`(追加一个 `it`)
+- Modify: `scripts/import-photos.mjs`(两处提示文字)
+- **不要动** `CLAUDE.md`、`docs/superpowers/HANDOFF.md`:工作区里它们有指挥官未提交的改动,`git status` 看到属正常,不要 add、不要还原。
+
+- [ ] **Step 1: 换正文**
+
+把 `src/data/restaurants/suburbia-bakery.md` 里从 `## en` 到文件末尾的内容,整段替换为(逐字照抄,包括中英文标点):
+
+```markdown
+## en
+
+Love this place! A variety of breads and pastries to choose from, and the miso rye loaf is so interesting! We also got the pandan danish and shakshuka, and they are both so intriguing and delicious. The ham & cheese baguette is not as plain as it sounds: the crunchiness and moisture of the bread are just spot on, then the quality provolone cheese, ham and mustard just complete the job perfectly.
+
+Very cosy, friendly atmosphere, quite spacious and well-lit. The day we went they had a coffee tasting going on — a nice experience trying several Seven Seeds coffees, a roaster I've always liked a lot.
+
+## zh
+
+超爱这家！面包和酥点选择很多，味噌黑麦面包特别有意思！我们还点了斑斓丹麦和 shakshuka，都很新奇又好吃。火腿芝士法棍并不像名字听起来那么平淡：面包的脆度和湿润度恰到好处，再加上优质的 provolone 芝士、火腿和芥末，完美收尾。
+
+氛围温馨友好，空间挺宽敞，光线也明亮。我们去的那天正好有咖啡品鉴，试了好几款 Seven Seeds 的咖啡，体验很不错——这是我一直很喜欢的烘焙商。
+```
+
+自查:`grep -c "Happy accident\|意外之喜" src/data/restaurants/suburbia-bakery.md` 应输出 `0`。
+
+- [ ] **Step 2: 写失败的测试**
+
+在 `scripts/lib/photos.test.mjs` 的 `describe('planPhotos', …)` 里,最后一个 `it` 之后追加:
+
+```js
+  it('accepts webp (photos downloaded from the Google Maps review page)', () => {
+    const p = planPhotos(['2.webp', '1.WEBP', 'cover.jpg'])
+    expect(p.files).toEqual(['1.WEBP', '2.webp', 'cover.jpg'])
+    expect(p.targets).toEqual(['1.jpg', '2.jpg', '3.jpg'])
+  })
+```
+
+- [ ] **Step 3: 跑测试确认失败**
+
+Run: `npx vitest run scripts/lib/photos.test.mjs`
+Expected: 新测试 FAIL(`p.files` 只有 `['cover.jpg']`)。
+
+- [ ] **Step 4: 实现**
+
+`scripts/lib/photos.mjs` 第 2 行
+
+```js
+const IMAGE = /\.(jpe?g|png)$/i
+```
+
+改为
+
+```js
+const IMAGE = /\.(jpe?g|png|webp)$/i
+```
+
+`scripts/import-photos.mjs` 两处文字:
+
+第 3 行注释
+
+```js
+// 末尾打印可直接粘进 frontmatter 的 images: 片段。HEIC 不处理:请先在访达里转成 JPEG(保留拍摄时间便于排序)。
+```
+
+改为
+
+```js
+// 末尾打印可直接粘进 frontmatter 的 images: 片段。接受 jpg / png / webp(Google 地图评价页下载的是 webp);HEIC 不处理:请先在访达里转成 JPEG(保留拍摄时间便于排序)。
+```
+
+以及
+
+```js
+  console.error('目录里没有 jpg / jpeg / png')
+```
+
+改为
+
+```js
+  console.error('目录里没有 jpg / jpeg / png / webp')
+```
+
+- [ ] **Step 5: 跑测试确认通过**
+
+Run: `npx vitest run scripts/lib/photos.test.mjs`
+Expected: PASS(4 passed)。
+
+- [ ] **Step 6: 用真 webp 冒烟一次(不提交产物)**
+
+```bash
+mkdir -p /tmp/webp-smoke/src
+node -e "require('sharp')({create:{width:2400,height:1800,channels:3,background:'#C84B2F'}}).webp().toFile('/tmp/webp-smoke/src/01.webp').then(i=>console.log('made',i.width,i.height))"
+node scripts/import-photos.mjs /tmp/webp-smoke/src smoke-test --out /tmp/webp-smoke/out
+rm -rf /tmp/webp-smoke
+```
+
+Expected: 打印 `01.webp → /tmp/webp-smoke/out/smoke-test/1.jpg (1600×1200, … KB)`,末尾 `images:` 片段里有 `- "1.jpg"`。`public/images/` 下不应出现 `smoke-test`。
+
+- [ ] **Step 7: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;测试 **166 passed**(165 + 1);构建成功。
+
+- [ ] **Step 8: Commit(连同本计划文件的这段追加)**
+
+```bash
+git add src/data/restaurants/suburbia-bakery.md scripts/lib/photos.mjs scripts/lib/photos.test.mjs scripts/import-photos.mjs docs/superpowers/plans/2026-11-16-takeout-trial-suburbia.md
+git commit -m "Suburbia: review text faithful to the original; photos:import accepts webp"
+```

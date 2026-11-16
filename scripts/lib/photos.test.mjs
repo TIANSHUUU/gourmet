@@ -16,4 +16,9 @@ describe('planPhotos', () => {
     expect(p.files).toEqual(['y.jpg'])
     expect(p.skipped).toEqual(['x.heic'])
   })
+  it('accepts webp (photos downloaded from the Google Maps review page)', () => {
+    const p = planPhotos(['2.webp', '1.WEBP', 'cover.jpg'])
+    expect(p.files).toEqual(['1.WEBP', '2.webp', 'cover.jpg'])
+    expect(p.targets).toEqual(['1.jpg', '2.jpg', '3.jpg'])
+  })
 })

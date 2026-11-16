@@ -17,12 +17,12 @@ images: []
 
 ## en
 
-Love this place! So many breads and pastries to choose from, and the miso rye loaf is a fun one. We also got the pandan danish and the shakshuka, and both were intriguing and delicious. The ham & cheese baguette sounds plain but really isn't: the crunch and moisture of the bread are spot on, then quality provolone, ham and mustard finish the job perfectly.
+Love this place! A variety of breads and pastries to choose from, and the miso rye loaf is so interesting! We also got the pandan danish and shakshuka, and they are both so intriguing and delicious. The ham & cheese baguette is not as plain as it sounds: the crunchiness and moisture of the bread are just spot on, then the quality provolone cheese, ham and mustard just complete the job perfectly.
 
-Cosy, friendly, spacious and well-lit. The day we went there happened to be a coffee tasting on, so we got to try several Seven Seeds coffees — a roaster I've always liked a lot. Happy accident.
+Very cosy, friendly atmosphere, quite spacious and well-lit. The day we went they had a coffee tasting going on — a nice experience trying several Seven Seeds coffees, a roaster I've always liked a lot.
 
 ## zh
 
-超爱这家！面包和酥点琳琅满目，味噌黑麦面包特别有意思。我们还点了斑斓丹麦和 shakshuka，都又新奇又好吃。火腿芝士法棍听名字平平无奇，吃起来可不是那么回事：面包的脆度和湿润度拿捏得刚刚好，优质 provolone 芝士配火腿再来点芥末，完美收尾。
+超爱这家！面包和酥点选择很多，味噌黑麦面包特别有意思！我们还点了斑斓丹麦和 shakshuka，都很新奇又好吃。火腿芝士法棍并不像名字听起来那么平淡：面包的脆度和湿润度恰到好处，再加上优质的 provolone 芝士、火腿和芥末，完美收尾。
 
-氛围温馨友好，空间宽敞又明亮。去的那天正好赶上咖啡品鉴，试了好几款 Seven Seeds 的咖啡——正是我一直很喜欢的烘焙商，算是意外之喜。
+氛围温馨友好，空间挺宽敞，光线也明亮。我们去的那天正好有咖啡品鉴，试了好几款 Seven Seeds 的咖啡，体验很不错——这是我一直很喜欢的烘焙商。

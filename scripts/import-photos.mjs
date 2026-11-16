@@ -1,6 +1,6 @@
 // 原图目录 → public/images/<slug>/1.jpg, 2.jpg…(长边 1600、按 EXIF 转正、剥掉全部元数据含 GPS)
 //   npm run photos:import -- <原图目录> <slug> [--max 1600] [--out public/images]
-// 末尾打印可直接粘进 frontmatter 的 images: 片段。HEIC 不处理:请先在访达里转成 JPEG(保留拍摄时间便于排序)。
+// 末尾打印可直接粘进 frontmatter 的 images: 片段。接受 jpg / png / webp(Google 地图评价页下载的是 webp);HEIC 不处理:请先在访达里转成 JPEG(保留拍摄时间便于排序)。
 import { readdir, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
@@ -21,7 +21,7 @@ const OUT = path.join(opt('--out', 'public/images'), slug)
 const { files, targets, skipped } = planPhotos(await readdir(srcDir))
 if (skipped.length) console.warn(`⚠ 跳过 HEIC(请先转成 JPEG):${skipped.join(', ')}`)
 if (files.length === 0) {
-  console.error('目录里没有 jpg / jpeg / png')
+  console.error('目录里没有 jpg / jpeg / png / webp')
   process.exit(1)
 }
 await mkdir(OUT, { recursive: true })

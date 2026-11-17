@@ -33,7 +33,9 @@
 
 2026-11-16 用 **Suburbia Bakery**(业主自己的 Google 评论)试跑了 Takeout 成稿全流程,计划 `plans/2026-11-16-takeout-trial-suburbia.md`(5 个 Task)。试跑补上了四处只有 Takeout 条目才会碰到的缺口:首页卡片无照片时改用分类徽章占位(`CoverFallback` + `src/lib/cover.ts`);详情页正文按空行分段(`splitParagraphs`);地图卡片无封面时标题避让 × 按钮;`photos:import` 接受 webp。Takeout 导出里没有评论照片(`Reviews.json` 没有照片字段),业主会从 Google 地图评价页下载 webp。站上现有 7 家吃喝,**还没有任何景点**。
 
-同日第二批(计划 `plans/2026-11-16-content-batch-2.md`,7 个 Task):新增第 4 个吃喝分类 **烘焙 / Bakeries**(`bakery`,可颂徽章 `#C2557A`,Suburbia 与 Soma Pastry 挪入);新增城市 **莫宁顿半岛**、**金泽**;成稿 Wasshoi、Tatin、Madame Sourdough、Crittenden Wines、金沢鮨 藍AO、Aunty Peg's。站上现有 13 家吃喝,仍无景点。原图库新增 `gourmet/bakery/`。
+同日第二批(计划 `plans/2026-11-16-content-batch-2.md`,7 个 Task):新增第 4 个吃喝分类 **烘焙 / Bakeries**(`bakery`,可颂徽章 `#C2557A`,Suburbia 与 Soma Pastry 挪入);新增城市 **莫宁顿半岛**、**金泽**;成稿 Wasshoi、Tatin、Madame Sourdough、Crittenden Wines、金沢鮨 藍AO、Aunty Peg's。站上现有 13 家吃喝。原图库新增 `gourmet/bakery/`。
+
+2026-11-17 第三批(计划 `plans/2026-11-16-kanazawa-batch.md`,4 个 Task):业主定 **景点 / 玩乐 / 购物 / 住宿只上地图**——`spots/` 四类不生成 `/<slug>` 图文页、不进首页,评论全文和其余照片直接显示在地图卡片里(`isSpotKind()` 在 `src/lib/map/kinds.ts`;`placesToGeoJSON` 只给景点带 `review_en/zh` 与 `gallery`)。首批景点(金泽):石川县立图书馆、Daiwa Roynet Hotel Kanazawa Miyabi、好日山荘 金沢エムザ店(业主要求只用文字)、mont-bell。KIRARI(金泽回转寿司)业主决定暂不上。景点照片放 `gourmet/spots/<slug>/imgs/`。
 
 **分支**(`web/` 是 git 根目录):
 
@@ -67,7 +69,7 @@
    - **编辑决定由指挥官在计划里定死**:分类、slug、`map_url`、`visited`、类型标签。执行者只写 tagline 和双语正文,并按计划的事实清单自查。**正文必须忠实原文**:业主看过试跑稿后明确说「不用多加……之类的话语，按照我的原文翻译即可」(试跑稿自己加了「算是意外之喜 / Happy accident」,还把英文意译了)。指挥官要对照草稿逐句核:有没有多出来的话、有没有改写业主的原话。
    - `map_url`:保留 Takeout 的 ftid `!1s0x…:0x…`,`takeout:import` 靠它判重;路径里补上店名(`/maps/place/<Name+With+Pluses>/data=!4m2!3m1!1s0x…`)。写进计划前,先在浏览器里点开确认能到对的店。
    - 吃喝类的照片目录按分类放 `gourmet/{restaurant,cafe,bakery,winebar}/<名字>/imgs/`(`bakery/` 是 2026-11-16 随「烘焙」分类新建的);没有照片就 `images: []`,首页卡片会显示徽章占位。
-   - 预览要看三处:首页卡片、手机上的详情页、`/map?city=…&place=<slug>` 的卡片。地图瓦片要等 10 秒左右才出来。
+   - 预览要看三处:首页卡片、手机上的详情页、`/map?city=…&place=<slug>` 的卡片。景点没有首页卡片和详情页,只看地图卡片(全文 + 照片、没有「查看图文」)。地图瓦片要等 10 秒左右才出来;开发服务器上直接打开景点的 `/<slug>` 会报 500(output: export 的开发模式行为),正式构建里不生成该页,线上是 404。
 2. **小人手绘版**:已完成上线(`npm run walker:slice` + `map:assets`,见 CLAUDE.md Map 一节)。重画时同样流程。
 3. **美术待拍板**:z14+ 市中心 3D 建筑棕色太抢戏(`scripts/build-map-style.mjs` 的 `building` / `building3d`);配色 A/B;地标与店名的碰撞优先级(现在店名永远优先)。
 4. 其他城市(十和田、Mount Gambier)的地标与贴图铺开;「About Me」页(业主心愿);`gourmet/{restaurant,cafe,winebar}/` 里未发布的条目。

@@ -6,7 +6,7 @@ import { useLang } from '@/components/LanguageContext'
 import { basePath } from '@/lib/basePath'
 import { MAP_UI } from '@/lib/mapI18n'
 import { cityOf, type City } from '@/lib/map/cities'
-import { KIND_ORDER } from '@/lib/map/kinds'
+import { KIND_ORDER, effectiveKinds, toggledKinds } from '@/lib/map/kinds'
 import { parseMapUrl, serializeMapUrl } from '@/lib/map/urlState'
 import { dirFromKeys, WALK_KEYS } from '@/lib/map/walker'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
@@ -38,7 +38,11 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
   const [activeCity, setActiveCity] = useState<string | null>(null)
   const [activeSlug, setActiveSlug] = useState<string | null>(null)
   const [walkTarget, setWalkTarget] = useState<{ slug: string; nonce: number } | null>(null)
-  const [kinds, setKinds] = useState<PlaceKind[]>(KIND_ORDER)
+  // 只选了国家、还没选城市时,地图停在该国视角(不写进 URL)
+  const [activeCountry, setActiveCountry] = useState<string | null>(null)
+  // 分类可多选;一个都没选 = 全部显示。传给 MapView 的是 effectiveKinds 之后的结果
+  const [selectedKinds, setSelectedKinds] = useState<PlaceKind[]>([])
+  const kinds = useMemo(() => effectiveKinds(selectedKinds), [selectedKinds])
   const [failed, setFailed] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
   const [isTouch, setIsTouch] = useState(false)
@@ -59,8 +63,10 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
     const { city, place } = parseMapUrl(window.location.search)
     const f = place ? (bySlug.get(place) ?? null) : null
     const cityFromPlace = f ? (cityOf(f.geometry.coordinates as LngLat, cities)?.slug ?? null) : null
+    const startCity = city && cities.some(c => c.slug === city) ? city : cityFromPlace
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setActiveCity(city && cities.some(c => c.slug === city) ? city : cityFromPlace)
+    setActiveCity(startCity)
+    setActiveCountry(cities.find(c => c.slug === startCity)?.country ?? null)
     setActiveSlug(f ? f.properties.slug : null)
     setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     setIsTouch(window.matchMedia('(pointer: coarse)').matches)
@@ -109,7 +115,10 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
     const f = bySlug.get(slug)
     if (!f) return
     const c = cityOf(f.geometry.coordinates as LngLat, cities)
-    if (c) setActiveCity(c.slug)
+    if (c) {
+      setActiveCity(c.slug)
+      setActiveCountry(c.country)
+    }
     if (reducedMotion) {
       setActiveSlug(slug)
       return
@@ -118,14 +127,25 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
     setWalkTarget({ slug, nonce: Date.now() })
   }, [bySlug, cities, reducedMotion])
 
-  const pickCity = useCallback((slug: string | null) => {
+  const pickCity = useCallback((slug: string) => {
     setActiveCity(slug)
+    setActiveCountry(cities.find(c => c.slug === slug)?.country ?? null)
     setActiveSlug(null)
     setWalkTarget(null)
-  }, [])
+  }, [cities])
+
+  // 总览(null):清空国家与城市。点国家:选中并进该国视角;已在该国某城市里 → 退回该国视角;
+  // 已在该国视角 → 再点一次取消、回总览
+  const pickCountry = useCallback((code: string | null) => {
+    const backToOverview = code === null || (code === activeCountry && activeCity === null)
+    setActiveCountry(backToOverview ? null : code)
+    setActiveCity(null)
+    setActiveSlug(null)
+    setWalkTarget(null)
+  }, [activeCountry, activeCity])
 
   const toggleKind = useCallback((k: PlaceKind) => {
-    setKinds(prev => (prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]))
+    setSelectedKinds(prev => toggledKinds(prev, k))
   }, [])
 
   const handleArrive = useCallback((slug: string) => {
@@ -150,6 +170,7 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
           lang={lang}
           cities={cities}
           activeCity={activeCity}
+          activeCountry={activeCountry}
           focusPlace={focusFeature}
           walkTarget={walkTarget}
           kinds={kinds}
@@ -165,8 +186,8 @@ export default function MapPageClient({ data, landmarks, cities }: { data: Place
       {/* 顶部悬浮层:搜索 + 城市 + 分类。外层不接事件,内层才接,免得挡住地图拖拽 */}
       <div className="absolute inset-x-0 top-0 z-10 p-3 flex flex-col gap-2 pointer-events-none">
         <div className="pointer-events-auto"><MapSearch features={data.features} onPick={pickPlace} /></div>
-        <div className="pointer-events-auto"><CityChips cities={cities} active={activeCity} onChange={pickCity} /></div>
-        <div className="pointer-events-auto"><KindChips available={available} active={kinds} onToggle={toggleKind} /></div>
+        <div className="pointer-events-auto"><CityChips cities={cities} country={activeCountry} city={activeCity} onCountry={pickCountry} onCity={pickCity} /></div>
+        <div className="pointer-events-auto"><KindChips available={available} selected={selectedKinds} onToggle={toggleKind} /></div>
       </div>
       {/* 左下:回到菠萝子 / 切换俯视(在署名条上方);只在城市视图里有小人时显示 */}
       {activeCity && (

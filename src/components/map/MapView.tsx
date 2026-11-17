@@ -19,6 +19,7 @@ import { WalkerController } from './walkerController'
 import { KIND_ORDER } from '@/lib/map/kinds'
 import { boundsOf, haversineMeters } from '@/lib/map/geo'
 import { inBounds, type City } from '@/lib/map/cities'
+import { coordsInCountry } from '@/lib/map/countries'
 import { EMPTY_MANIFEST, hasIcon, imageSpecs, parseManifest, storefrontSlugs, walkerSprite, type AssetManifest, type ImageSpec } from '@/lib/map/assets'
 import type { LandmarkCollection } from '@/lib/map/landmarks'
 import type { Vec } from '@/lib/map/walker'
@@ -65,6 +66,8 @@ type Props = {
   lang: 'en' | 'zh'
   /** null = 总览(框住全部地点,小人隐藏) */
   activeCity: string | null
+  /** 只选了国家、还没选城市时:总览镜头只框住该国的地点(ISO 两位码);null = 全部地点 */
+  activeCountry: string | null
   /** 卡片打开的地点:镜头飞过去、高亮、小人站过去 */
   focusPlace: PlaceFeature | null
   /** 点标签后要走去的店;nonce 让连点同一家也能重新走 */
@@ -117,7 +120,7 @@ async function preloadImages(specs: ImageSpec[]): Promise<LoadedImage[]> {
 const landmarkTextField = (lang: 'en' | 'zh') => ['get', lang === 'en' ? 'name_en' : 'name_zh'] as ['get', string]
 
 export default function MapView(props: Props) {
-  const { styleUrl, data, landmarks, cities, lang, activeCity, focusPlace, walkTarget, kinds, reducedMotion, apiRef } = props
+  const { styleUrl, data, landmarks, cities, lang, activeCity, activeCountry, focusPlace, walkTarget, kinds, reducedMotion, apiRef } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const walkerRef = useRef<WalkerController | null>(null)
@@ -357,7 +360,8 @@ export default function MapView(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [styleUrl])
 
-  // 2) 城市切换 / 总览:城市视角框住该城所有店;小人出现在城市中心(单店城市:店南边一点)
+  // 2) 城市切换 / 国家 / 总览:城市视角框住该城所有店,小人出现在城市中心(单店城市:店南边一点);
+  //    没选城市时是俯视总览,选了国家就只框住该国的地点(镜头参数与总览完全相同)
   useEffect(() => {
     const m = mapRef.current
     const walker = walkerRef.current
@@ -366,7 +370,8 @@ export default function MapView(props: Props) {
     if (!city) {
       padRef.current = OVERVIEW_PADDING
       walker.hide()
-      const b = boundsOf(data.features.map(f => f.geometry.coordinates as LngLat))
+      const all = data.features.map(f => f.geometry.coordinates as LngLat)
+      const b = boundsOf(activeCountry ? coordsInCountry(all, cities, activeCountry) : all)
       if (b) m.fitBounds(b, { padding: OVERVIEW_PADDING, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
       return
     }
@@ -391,7 +396,7 @@ export default function MapView(props: Props) {
     }
     walker.placeAt(spawn)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCity, ready])
+  }, [activeCity, activeCountry, ready])
 
   // 3) 卡片打开的店:高亮 + 飞过去(给卡片留出位置)+ 小人站过去;关闭时复位 padding
   useEffect(() => {

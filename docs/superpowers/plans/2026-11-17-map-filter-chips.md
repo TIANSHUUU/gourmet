@@ -710,3 +710,111 @@ git commit -m "Docs: map filter chips and the country → city row"
 
 - 重跑 lint / test / build,读 diff。
 - 预览 `/gourmet/map`:分类按钮初始全深灰、点「咖啡」只剩咖啡且按钮变橙、再点「烘焙」两类都在、再点取消;国家排是「总览 / 🇦🇺 澳大利亚 / 🇯🇵 日本」(圆旗),点日本镜头框住十和田 + 金泽并出现城市排,点金泽进城市视角(小人出现),再点日本退回国家视角,再点日本回总览;`?city=kanazawa` 直达时日本按钮是橙的;手机尺寸下各排不溢出(横向可滑)。
+
+---
+
+## 追加(指挥官预览后 + 业主反馈,2026-11-17)
+
+### Task 5: 镜头留白跟着新的顶部按钮区走(为南北很长的国家做准备)
+
+业主:日本视角下金泽那团离画面底边太近;以后会同时有北海道和冲绳的条目,国家视角要框得住南北两端。
+
+指挥官实测(desktop 835×834 与 mobile 375×812 一样):顶部浮层底边在总览时约 **133 px**,选了国家 / 城市后多一排城市按钮,约 **169 px**;地点的徽章 + 店名牌伸到坐标点上方约 55 px。现在 `OVERVIEW_PADDING` / `CITY_PADDING` 的 top 都是 150,所以国家视角和城市视角里最北的点会钻到按钮下面;bottom 60 也太贴边。用 `[[127.68,26.21],[141.9,45.41]]`(那霸 → 宗谷)模拟过:top 210 / bottom 100 时桌面与手机都能完整框住整个日本(缩放约 3.7),南北两端都离边缘有余量。
+
+**Files:**
+- Modify: `src/components/map/MapView.tsx`(padding 常量 + 三处使用)
+- Modify: `CLAUDE.md`(Camera padding 那条补一句)
+
+- [ ] **Step 1: 常量**
+
+`src/components/map/MapView.tsx` 里这四行:
+
+```ts
+const OVERVIEW_PADDING = { top: 150, bottom: 60, left: 60, right: 60 }
+const CITY_PADDING = { top: 150, bottom: 80, left: 40, right: 40 }
+// 手机:右下角有 ~150px 高的虚拟方向键,底部要多留,否则最南的店会被它盖住
+const CITY_PADDING_MOBILE = { top: 150, bottom: 200, left: 40, right: 40 }
+```
+
+替换为:
+
+```ts
+// top = 顶部浮层底边 + ~45 px(徽章 + 店名牌伸到坐标点上方约 55 px)。浮层底边实测(2026-11-17):
+// 总览约 133 px;选了国家 / 城市后多一排城市按钮,约 169 px。浮层布局改了要重新量。
+// 国家视角会遇到南北很长的国家(日本:北海道 ↔ 冲绳),bottom 也留足,别让最南的点贴边。
+const OVERVIEW_PADDING = { top: 180, bottom: 100, left: 60, right: 60 }
+const COUNTRY_PADDING = { top: 210, bottom: 100, left: 60, right: 60 }
+const COUNTRY_PADDING_MOBILE = { top: 210, bottom: 100, left: 40, right: 40 }
+const CITY_PADDING = { top: 210, bottom: 80, left: 40, right: 40 }
+// 手机:右下角有 ~150px 高的虚拟方向键,底部要多留,否则最南的店会被它盖住
+const CITY_PADDING_MOBILE = { top: 210, bottom: 200, left: 40, right: 40 }
+```
+
+紧接在 `const cityPadding = () => …` 那一行之后加一行:
+
+```ts
+const overviewPadding = (country: string | null) =>
+  country ? (isMobileViewport() ? COUNTRY_PADDING_MOBILE : COUNTRY_PADDING) : OVERVIEW_PADDING
+```
+
+- [ ] **Step 2: 总览 / 国家分支用它**
+
+城市 effect 的总览分支里:
+
+```ts
+      padRef.current = OVERVIEW_PADDING
+```
+
+改为
+
+```ts
+      padRef.current = overviewPadding(activeCountry)
+```
+
+同一分支里的
+
+```ts
+      if (b) m.fitBounds(b, { padding: OVERVIEW_PADDING, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
+```
+
+改为
+
+```ts
+      if (b) m.fitBounds(b, { padding: padRef.current, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
+```
+
+- [ ] **Step 3: 卡片关闭时复位也用它**
+
+卡片 effect 里:
+
+```ts
+      padRef.current = activeCity ? cityPadding() : OVERVIEW_PADDING
+```
+
+改为
+
+```ts
+      padRef.current = activeCity ? cityPadding() : overviewPadding(activeCountry)
+```
+
+(`const padRef = useRef<PaddingOptions>(OVERVIEW_PADDING)` 的初始值不用改。全文件除常量定义外,不应再有别处直接用 `OVERVIEW_PADDING` 做镜头调用——`grep -n "OVERVIEW_PADDING" src/components/map/MapView.tsx` 应只剩定义、`overviewPadding` 里、`useRef` 初始值三处。)
+
+- [ ] **Step 4: 文档**
+
+`CLAUDE.md` 里以 `- **Camera padding is persistent in MapLibre.**` 开头的那一行,在该行末尾追加一句(同一行,前面空一格):
+
+```
+Padding `top` = the top overlay's bottom edge + ~45 px (badge + label reach ~55 px above the point); measured 2026-11-17: ~133 px in overview, ~169 px once a country/city is picked (extra city row) — hence `OVERVIEW_PADDING` top 180 and `COUNTRY_PADDING[_MOBILE]` / `CITY_PADDING[_MOBILE]` top 210, bottom 100 for overview/country so long countries (Japan, Hokkaido ↔ Okinawa) don't hug the edges. Re-measure if the overlay layout changes.
+```
+
+- [ ] **Step 5: lint + 全量测试 + 构建**
+
+Run: `npm run lint && npx vitest run && NEXT_PUBLIC_BASE_PATH=/gourmet npm run build`
+Expected: lint 无报错;**180 passed**;构建成功。
+
+- [ ] **Step 6: Commit(连同本计划文件的这段追加)**
+
+```bash
+git add src/components/map/MapView.tsx CLAUDE.md docs/superpowers/plans/2026-11-17-map-filter-chips.md
+git commit -m "Map camera: padding follows the taller chip overlay; room for long countries"
+```

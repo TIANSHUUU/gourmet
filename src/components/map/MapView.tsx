@@ -39,12 +39,19 @@ const GENERIC_LANDMARK = 'lm-generic'
 // MapLibre 的 padding 是持久的:每次镜头操作都显式给,卡片关闭时复位。
 // 注意 fitBounds 默认把 padding 叠加在地图"当前 padding"上且不持久化,所以 fitBounds 都要带 absolutePadding: true
 // (maplibre 7 起成为默认);flyTo / easeTo / jumpTo 传的 padding 本来就是替换并持久。
-const OVERVIEW_PADDING = { top: 150, bottom: 60, left: 60, right: 60 }
-const CITY_PADDING = { top: 150, bottom: 80, left: 40, right: 40 }
+// top = 顶部浮层底边 + ~45 px(徽章 + 店名牌伸到坐标点上方约 55 px)。浮层底边实测(2026-11-17):
+// 总览约 133 px;选了国家 / 城市后多一排城市按钮,约 169 px。浮层布局改了要重新量。
+// 国家视角会遇到南北很长的国家(日本:北海道 ↔ 冲绳),bottom 也留足,别让最南的点贴边。
+const OVERVIEW_PADDING = { top: 180, bottom: 100, left: 60, right: 60 }
+const COUNTRY_PADDING = { top: 210, bottom: 100, left: 60, right: 60 }
+const COUNTRY_PADDING_MOBILE = { top: 210, bottom: 100, left: 40, right: 40 }
+const CITY_PADDING = { top: 210, bottom: 80, left: 40, right: 40 }
 // 手机:右下角有 ~150px 高的虚拟方向键,底部要多留,否则最南的店会被它盖住
-const CITY_PADDING_MOBILE = { top: 150, bottom: 200, left: 40, right: 40 }
+const CITY_PADDING_MOBILE = { top: 210, bottom: 200, left: 40, right: 40 }
 const isMobileViewport = () => window.matchMedia('(max-width: 767px)').matches
 const cityPadding = () => (isMobileViewport() ? CITY_PADDING_MOBILE : CITY_PADDING)
+const overviewPadding = (country: string | null) =>
+  country ? (isMobileViewport() ? COUNTRY_PADDING_MOBILE : COUNTRY_PADDING) : OVERVIEW_PADDING
 const CARD_PADDING_MOBILE = { top: 0, bottom: 260, left: 0, right: 0 }
 const CARD_PADDING_DESKTOP = { top: 0, bottom: 0, left: 0, right: 380 }
 /** 单店城市:小人出生在店南边约 90 m,免得一按键就"到达" */
@@ -368,11 +375,11 @@ export default function MapView(props: Props) {
     if (!m || !walker || !ready) return
     const city = cities.find(c => c.slug === activeCity)
     if (!city) {
-      padRef.current = OVERVIEW_PADDING
+      padRef.current = overviewPadding(activeCountry)
       walker.hide()
       const all = data.features.map(f => f.geometry.coordinates as LngLat)
       const b = boundsOf(activeCountry ? coordsInCountry(all, cities, activeCountry) : all)
-      if (b) m.fitBounds(b, { padding: OVERVIEW_PADDING, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
+      if (b) m.fitBounds(b, { padding: padRef.current, absolutePadding: true, pitch: 0, bearing: 0, maxZoom: 12, duration: reducedMotion ? 0 : 1200 })
       return
     }
     const inCity = data.features
@@ -407,7 +414,7 @@ export default function MapView(props: Props) {
     if (lastFocusRef.current) m.setFeatureState({ source: SOURCE_ID, id: lastFocusRef.current }, { active: false })
     lastFocusRef.current = focusPlace?.properties.slug ?? null
     if (!focusPlace) {
-      padRef.current = activeCity ? cityPadding() : OVERVIEW_PADDING
+      padRef.current = activeCity ? cityPadding() : overviewPadding(activeCountry)
       // 只有"刚关掉卡片"才需要把 padding 缓动回去。首次加载 / 卡片开着切城市时,上面的城市 effect 已经起了
       // 带 padding 的 fitBounds / flyTo,这里再 easeTo 会把它打断(MapLibre 任何镜头调用都会 stop 掉进行中的动画)
       if (hadFocus && !m.isMoving()) m.easeTo({ padding: padRef.current, duration: reducedMotion ? 0 : 300 })

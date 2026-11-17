@@ -37,6 +37,8 @@
 
 2026-11-17 第三批(计划 `plans/2026-11-16-kanazawa-batch.md`,4 个 Task):业主定 **景点 / 玩乐 / 购物 / 住宿只上地图**——`spots/` 四类不生成 `/<slug>` 图文页、不进首页,评论全文和其余照片直接显示在地图卡片里(`isSpotKind()` 在 `src/lib/map/kinds.ts`;`placesToGeoJSON` 只给景点带 `review_en/zh` 与 `gallery`)。首批景点(金泽):石川县立图书馆、Daiwa Roynet Hotel Kanazawa Miyabi、好日山荘 金沢エムザ店(业主要求只用文字)、mont-bell。KIRARI(金泽回转寿司)业主决定暂不上。景点照片放 `gourmet/spots/<slug>/imgs/`。
 
+2026-11-17 地图筛选按钮改版(设计 `specs/2026-11-17-map-filter-chips-design.md`,计划 `plans/2026-11-17-map-filter-chips.md`,5 个 Task):分类按钮默认深灰、点了才选中(橙)、可多选、都不选 = 全部;城市按钮改成两级——「总览 + 圆形国旗 + 国名」,点国家镜头框住该国地点并出现第二排城市。国旗是代码画的 SVG(`FlagCircle.tsx`,现有 AU / JP;新国家没画时用 emoji 裁圆后备),新国家要在 `src/lib/map/countries.ts` 的 `COUNTRIES` 加中英名、每个城市在 `cities.json` 写 `country`。镜头留白按顶部按钮区的实测高度设(总览 top 180、国家 / 城市 top 210、总览与国家 bottom 100),为日本这种南北很长的国家留余量;按钮区布局改了要重量。
+
 **分支**(`web/` 是 git 根目录):
 
 | 分支 | 状态 | 说明 |

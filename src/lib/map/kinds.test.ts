@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { KIND_ORDER, KIND_COLORS, KIND_GLYPHS, isSpotKind } from './kinds'
+import { KIND_ORDER, KIND_COLORS, KIND_GLYPHS, effectiveKinds, isSpotKind, toggledKinds } from './kinds'
 import { RESTAURANT_KINDS, SPOT_KINDS } from '@/lib/places'
 
 describe('kinds', () => {
@@ -15,5 +15,14 @@ describe('kinds', () => {
   it('isSpotKind is true exactly for the spots/ kinds (map-only, no detail page)', () => {
     for (const k of SPOT_KINDS) expect(isSpotKind(k), k).toBe(true)
     for (const k of RESTAURANT_KINDS) expect(isSpotKind(k), k).toBe(false)
+  })
+  it('effectiveKinds: nothing selected means every kind is shown', () => {
+    expect(effectiveKinds([])).toEqual(KIND_ORDER)
+    expect(effectiveKinds(['bar', 'cafe'])).toEqual(['bar', 'cafe'])
+  })
+  it('toggledKinds adds a kind once and removes it on the second tap', () => {
+    expect(toggledKinds([], 'cafe')).toEqual(['cafe'])
+    expect(toggledKinds(['cafe'], 'bakery')).toEqual(['cafe', 'bakery'])
+    expect(toggledKinds(['cafe', 'bakery'], 'cafe')).toEqual(['bakery'])
   })
 })

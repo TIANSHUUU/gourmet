@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { placesToGeoJSON } from './placesToGeoJSON'
+import { placesToGeoJSON, splitGallery } from './placesToGeoJSON'
 import type { Place } from '@/lib/places'
 
 const make = (over: Partial<Place>): Place => ({
@@ -28,5 +28,21 @@ describe('placesToGeoJSON', () => {
   it('keeps no nested objects in properties (MapLibre flattens them otherwise)', () => {
     const [f] = placesToGeoJSON([make({})]).features
     for (const v of Object.values(f.properties)) expect(typeof v).toBe('string')
+  })
+  it('carries the full review and the extra photos only for map-only spots', () => {
+    const [spot, food] = placesToGeoJSON([
+      make({ slug: 's', kind: 'sight', images: ['1.jpg', '2.jpg', '3.jpg'], review_en: 'Hi.', review_zh: '嗨。' }),
+      make({ slug: 'f', kind: 'food', review_en: 'Yum.', review_zh: '好吃。' }),
+    ]).features
+    expect(spot.properties.review_en).toBe('Hi.')
+    expect(spot.properties.review_zh).toBe('嗨。')
+    expect(spot.properties.gallery).toBe('2.jpg|3.jpg')
+    expect(food.properties.review_en).toBe('')
+    expect(food.properties.review_zh).toBe('')
+    expect(food.properties.gallery).toBe('')
+  })
+  it('splitGallery turns the joined string back into file names', () => {
+    expect(splitGallery('2.jpg|3.jpg')).toEqual(['2.jpg', '3.jpg'])
+    expect(splitGallery('')).toEqual([])
   })
 })

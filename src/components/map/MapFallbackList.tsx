@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useLang } from '@/components/LanguageContext'
 import { MAP_UI } from '@/lib/mapI18n'
 import { cityOf, type City } from '@/lib/map/cities'
+import { isSpotKind } from '@/lib/map/kinds'
 import type { PlaceCollection, PlaceFeature } from '@/lib/map/placesToGeoJSON'
 import type { LngLat } from '@/lib/places'
 
@@ -26,9 +27,15 @@ export default function MapFallbackList({ data, cities }: { data: PlaceCollectio
           <ul className="space-y-2">
             {list.map(f => (
               <li key={f.properties.slug}>
-                <Link href={`/${f.properties.slug}`} className="font-semibold hover:text-[#F0742A]">
-                  {f.properties.name}
-                </Link>
+                {isSpotKind(f.properties.kind) ? (
+                  <a href={f.properties.map_url} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-[#F0742A]">
+                    {f.properties.name}
+                  </a>
+                ) : (
+                  <Link href={`/${f.properties.slug}`} className="font-semibold hover:text-[#F0742A]">
+                    {f.properties.name}
+                  </Link>
+                )}
                 <span className="text-[#8A99A6]">
                   {' '}· {lang === 'en' ? f.properties.cuisine_en : f.properties.cuisine_zh} · {f.properties.suburb}
                 </span>

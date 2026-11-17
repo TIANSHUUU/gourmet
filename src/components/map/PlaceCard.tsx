@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { useLang } from '@/components/LanguageContext'
 import { basePath } from '@/lib/basePath'
-import { formatVisited } from '@/lib/format'
+import { formatVisited, splitParagraphs } from '@/lib/format'
 import { MAP_UI } from '@/lib/mapI18n'
-import { KIND_COLORS } from '@/lib/map/kinds'
-import type { PlaceFeature } from '@/lib/map/placesToGeoJSON'
+import { KIND_COLORS, isSpotKind } from '@/lib/map/kinds'
+import { splitGallery, type PlaceFeature } from '@/lib/map/placesToGeoJSON'
 
 export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature; onClose: () => void }) {
   const { lang } = useLang()
@@ -17,6 +17,10 @@ export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature;
   const where = lang === 'en' ? `${p.suburb}, ${p.city}` : `${p.city} · ${p.suburb}`
   const visited = formatVisited(p.visited, lang)
   const mapLabel = p.map_type === 'amap' ? ui.openAmap : ui.openGoogle
+  // 景点类没有图文页:评论全文和其余照片直接放在卡片里(内容区可滚动),也不显示「查看图文」
+  const spot = isSpotKind(p.kind)
+  const review = spot ? (lang === 'en' ? p.review_en : p.review_zh) : ''
+  const gallery = spot ? splitGallery(p.gallery) : []
 
   return (
     <aside
@@ -51,13 +55,26 @@ export default function PlaceCard({ feature, onClose }: { feature: PlaceFeature;
         <p className="font-label text-[11px] uppercase tracking-wider text-[#8A99A6]">{cuisine} · {where}</p>
         {visited && <p className="font-label text-[11px] uppercase tracking-wider text-[#F0742A]">{visited}</p>}
         {tagline && <p className="text-base leading-relaxed">{tagline}</p>}
+        {review && (
+          <div className="text-sm leading-relaxed space-y-3 pt-1">
+            {splitParagraphs(review).map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        )}
+        {gallery.map(img => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={img} src={`${basePath}/images/${p.slug}/${img}`} alt={p.name} className="w-full h-auto rounded-sm mt-1" />
+        ))}
         <div className="flex gap-2 pt-2 flex-wrap">
-          <Link
-            href={`/${p.slug}`}
-            className="inline-flex items-center bg-[#0F84B5] text-white font-label text-xs font-bold uppercase tracking-widest px-4 py-2 hover:bg-[#F0742A] transition-colors"
-          >
-            {ui.viewStory}
-          </Link>
+          {!spot && (
+            <Link
+              href={`/${p.slug}`}
+              className="inline-flex items-center bg-[#0F84B5] text-white font-label text-xs font-bold uppercase tracking-widest px-4 py-2 hover:bg-[#F0742A] transition-colors"
+            >
+              {ui.viewStory}
+            </Link>
+          )}
           <a
             href={p.map_url}
             target="_blank"

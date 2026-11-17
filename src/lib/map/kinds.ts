@@ -26,3 +26,14 @@ export const KIND_GLYPHS: Record<PlaceKind, string> = {
   shop: '🛍️',
   stay: '🛏️',
 }
+
+/**
+ * 景点 / 玩乐 / 购物 / 住宿(spots/ 里的四类)只出现在地图上:没有 /<slug> 图文页,
+ * 评论全文和照片显示在地图卡片里(业主 2026-11-17 定)。
+ * 放在这里而不是 places.ts,是因为 places.ts 引用了 fs,不能进浏览器包;与 SPOT_KINDS 的一致性由 kinds.test.ts 保证。
+ */
+const SPOT_KIND_SET: ReadonlySet<PlaceKind> = new Set<PlaceKind>(['sight', 'activity', 'shop', 'stay'])
+
+export function isSpotKind(kind: PlaceKind): boolean {
+  return SPOT_KIND_SET.has(kind)
+}

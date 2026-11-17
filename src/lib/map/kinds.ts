@@ -37,3 +37,13 @@ const SPOT_KIND_SET: ReadonlySet<PlaceKind> = new Set<PlaceKind>(['sight', 'acti
 export function isSpotKind(kind: PlaceKind): boolean {
   return SPOT_KIND_SET.has(kind)
 }
+
+/** 地图分类筛选:一个都没选 = 显示全部 */
+export function effectiveKinds(selected: PlaceKind[]): PlaceKind[] {
+  return selected.length ? selected : KIND_ORDER
+}
+
+/** 点一下分类按钮:没选中就加上,已选中就去掉(可多选) */
+export function toggledKinds(selected: PlaceKind[], k: PlaceKind): PlaceKind[] {
+  return selected.includes(k) ? selected.filter(x => x !== k) : [...selected, k]
+}

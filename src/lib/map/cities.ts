@@ -6,6 +6,8 @@ export type City = {
   slug: string
   name_zh: string
   name_en: string
+  /** ISO 3166-1 两位码(AU / JP …),决定地图上的国家筛选按钮 */
+  country: string
   /** [[西, 南], [东, 北]] */
   bounds: [LngLat, LngLat]
   view: CityView
